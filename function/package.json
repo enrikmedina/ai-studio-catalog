@@ -4,7 +4,7 @@
   "description": "Azure Function proxy for the AI Studio Agent Catalog",
   "main": "dist/getAgents/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp src/getAgents/function.json dist/getAgents/function.json",
     "watch": "tsc -w",
     "start": "func start",
     "prestart": "npm run build"
