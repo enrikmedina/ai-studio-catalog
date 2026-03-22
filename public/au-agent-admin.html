@@ -465,16 +465,16 @@
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const MSAL_CONFIG = {
   auth: {
-    clientId: '<ADMIN_APP_CLIENT_ID>',
-    authority: 'https://login.microsoftonline.com/<TENANT_ID>',
+    clientId: '13d1f99c-2233-4712-8795-745e8697db0c',
+    authority: 'https://login.microsoftonline.com/ec20d836-3fb1-4ff3-a389-25fc6cf07baf',
     redirectUri: window.location.origin + window.location.pathname,
   },
   cache: { cacheLocation: 'sessionStorage' },
 };
 
 const GRAPH_SCOPES  = ['Sites.ReadWrite.All'];
-const SITE_ID       = '<SHAREPOINT_SITE_ID>';
-const LIST_ID       = '<LIST_ID>';
+const SITE_ID       = 'fnmysmb.sharepoint.com,dafe2cb8-f1ba-48a7-a089-f630bad98455,8c09a0a0-4776-4bab-9376-615b71ccc67e';
+const LIST_ID       = 'b9b5fee3-6535-49c7-8bad-283088f3f7b3';
 const GRAPH_BASE    = `https://graph.microsoft.com/v1.0/sites/${SITE_ID}/lists/${LIST_ID}`;
 
 // ── MSAL ──────────────────────────────────────────────────────────────────────

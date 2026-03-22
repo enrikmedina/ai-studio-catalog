@@ -95,7 +95,6 @@ function mapToFields(agent) {
     Connectors:  agent['Connectors / Features'],
     UpsellPath:  agent['Upsell Path'],
     Status:      'available',
-    Published:   true,
   };
 }
 
@@ -115,11 +114,28 @@ async function main() {
   const token = await getToken();
   console.log('   ✓ Token acquired\n');
 
+  // Test: insert a single minimal item to verify column names
+  console.log('🧪 Testing single item insert…');
+  try {
+    const testResult = await graphPost(`${GRAPH_BASE}/items`, token, {
+      fields: { Title: '__TEST_ITEM__' }
+    });
+    console.log('   ✓ Test insert succeeded, ID:', testResult.id);
+    // Clean up test item
+    const delUrl = `${GRAPH_BASE}/items/${testResult.id}`;
+    const delRes = await fetch(delUrl, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    console.log('   ✓ Test item deleted\n');
+  } catch (err) {
+    console.error('   ✗ Test insert failed:', err.message);
+    console.error('   → Check that the app registration has Sites.ReadWrite.All with admin consent');
+    process.exit(1);
+  }
+
   // Load all existing titles from SharePoint for duplicate check
   console.log('📥 Loading existing SharePoint items…');
   let existingTitles = new Set();
   try {
-    let url = `${GRAPH_BASE}/items?$select=id,fields&$expand=fields(select=Title)&$top=500`;
+    let url = `${GRAPH_BASE}/items?expand=fields&$top=500`;
     while (url) {
       const data = await graphGet(url, token);
       for (const item of data.value) {
