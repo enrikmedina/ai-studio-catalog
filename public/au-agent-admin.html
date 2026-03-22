@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Studio — Agent Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<style>
+  :root {
+    --teal:      #34DFBA;
+    --teal-pale: #B2EDE3;
+    --cream:     #F2F1ED;
+    --dark:      #1A1A2E;
+    --ink:       #212529;
+    --muted:     #6B7280;
+    --border:    #E2E0D8;
+    --radius:    10px;
+    --shadow:    0 2px 12px rgba(0,0,0,.08);
+    --danger:    #dc2626;
+    --danger-bg: #fef2f2;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--dark);
+    color: white;
+    padding: 0 40px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .header-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; gap: 20px;
+  }
+  .logo-block { display: flex; align-items: center; gap: 12px; }
+  .logo-m {
+    width: 34px; height: 34px; background: var(--teal);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--dark); font-weight: 900;
+  }
+  .logo-text { font-size: 15px; font-weight: 600; }
+  .logo-sub  { font-size: 11px; color: var(--teal-pale); letter-spacing: .08em; text-transform: uppercase; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .user-info { font-size: 13px; color: rgba(255,255,255,.6); }
+  .user-name { color: white; font-weight: 600; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    border: none; border-radius: 7px; padding: 9px 18px; cursor: pointer; transition: opacity .15s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn-primary   { background: var(--teal); color: var(--dark); }
+  .btn-secondary { background: rgba(255,255,255,.1); color: white; border: 1px solid rgba(255,255,255,.2); }
+  .btn-danger    { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; }
+  .btn-ghost     { background: white; color: var(--ink); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--teal); opacity: 1; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+  /* ── LOGIN SCREEN ── */
+  #loginScreen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: calc(100vh - 64px); gap: 20px; padding: 40px;
+    text-align: center;
+  }
+  .login-card {
+    background: white; border-radius: 16px; border: 1.5px solid var(--border);
+    padding: 48px 56px; max-width: 420px; width: 100%;
+    box-shadow: var(--shadow);
+  }
+  .login-icon { font-size: 40px; margin-bottom: 8px; }
+  .login-card h2 { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 10px; }
+  .login-card p  { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+  .btn-signin {
+    width: 100%; background: var(--dark); color: white;
+    border: none; border-radius: 8px; padding: 13px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: opacity .15s; display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-signin:hover { opacity: .85; }
+
+  /* ── MAIN APP ── */
+  #appScreen { display: none; }
+
+  .page-header {
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+  }
+  .page-header-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 24px; }
+  .page-subtitle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .toolbar {
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 12px 40px;
+  }
+  .toolbar-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--cream); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 8px 14px; flex: 1; max-width: 360px;
+  }
+  .search-box input {
+    border: none; background: none; outline: none;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; width: 100%;
+  }
+  .filter-select {
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; background: white; color: var(--ink); cursor: pointer;
+  }
+  .agent-count { font-size: 13px; color: var(--muted); margin-left: auto; }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    max-width: 1400px; margin: 24px auto; padding: 0 40px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%; border-collapse: collapse;
+    background: white; border-radius: var(--radius);
+    border: 1.5px solid var(--border); overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  thead { background: var(--dark); color: white; }
+  thead th {
+    padding: 12px 16px; text-align: left;
+    font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fafafa; }
+  td { padding: 12px 16px; font-size: 13px; vertical-align: middle; }
+  .td-name { font-weight: 600; color: var(--dark); max-width: 260px; }
+  .td-desc { color: var(--muted); max-width: 320px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── TIER BADGE ── */
+  .tier-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px;
+    letter-spacing: .02em; text-transform: uppercase; white-space: nowrap;
+  }
+  .t1 { background: #EAF3DE; color: #3B6D11; }
+  .t3 { background: #FAEEDA; color: #854F0B; }
+  .t5 { background: #FCEBEB; color: #A32D2D; }
+
+  /* ── STATUS DROPDOWN ── */
+  .status-select {
+    font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600;
+    border: 1.5px solid var(--border); border-radius: 20px;
+    padding: 3px 10px; cursor: pointer; background: white;
+  }
+  .status-select.available { border-color: #34DFBA; color: #0a8a66; background: rgba(52,223,186,.08); }
+  .status-select.in_build  { border-color: #F59E0B; color: #b45309; background: rgba(245,158,11,.08); }
+  .status-select.backlog   { border-color: #9CA3AF; color: #6B7280; background: rgba(156,163,175,.08); }
+  .status-select.draft     { border-color: var(--border); color: var(--muted); }
+
+  /* ── PUBLISHED TOGGLE ── */
+  .toggle-wrap { display: flex; align-items: center; gap: 8px; }
+  .toggle {
+    position: relative; width: 40px; height: 22px;
+    background: var(--border); border-radius: 11px; cursor: pointer;
+    transition: background .2s; border: none; padding: 0; flex-shrink: 0;
+  }
+  .toggle.on { background: var(--teal); }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 16px; height: 16px; border-radius: 50%; background: white;
+    transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .toggle.on::after { transform: translateX(18px); }
+  .toggle-label { font-size: 11px; color: var(--muted); }
+  .toggle.on + .toggle-label { color: #0a8a66; font-weight: 600; }
+
+  /* ── ROW ACTIONS ── */
+  .row-actions { display: flex; gap: 6px; align-items: center; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45); backdrop-filter: blur(4px);
+    z-index: 300; display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: white; border-radius: 14px; width: 100%; max-width: 680px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,.2);
+    transform: scale(.96); transition: transform .2s;
+  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal-header {
+    background: var(--dark); color: white;
+    padding: 22px 28px; border-radius: 14px 14px 0 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-family: 'DM Serif Display', serif; font-size: 20px; }
+  .modal-close {
+    background: rgba(255,255,255,.12); border: none; border-radius: 6px;
+    color: white; cursor: pointer; width: 32px; height: 32px; font-size: 18px;
+    display: flex; align-items: center; justify-content: center; transition: background .15s;
+  }
+  .modal-close:hover { background: rgba(255,255,255,.22); }
+  .modal-body { padding: 28px; display: flex; flex-direction: column; gap: 18px; }
+  .modal-footer { padding: 0 28px 28px; display: flex; gap: 10px; justify-content: flex-end; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  input[type=text], select, textarea {
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; background: white; color: var(--ink);
+    transition: border-color .15s; width: 100%;
+  }
+  input[type=text]:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--teal);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--dark); color: white;
+    padding: 12px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    transform: translateY(12px); opacity: 0;
+    transition: all .25s; pointer-events: none; z-index: 999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-left: 4px solid var(--teal); }
+  .toast.error   { border-left: 4px solid var(--danger); }
+
+  /* ── LOADING / EMPTY ── */
+  .state-message {
+    text-align: center; padding: 80px 40px; color: var(--muted);
+  }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border);
+    border-top-color: var(--teal); border-radius: 50%;
+    animation: spin .7s linear infinite; margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 768px) {
+    header, .page-header, .toolbar { padding-left: 16px; padding-right: 16px; }
+    .table-wrap { padding: 0 16px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo-block">
+      <div class="logo-m">m</div>
+      <div>
+        <div class="logo-text">mySMB</div>
+        <div class="logo-sub">AI Studio — Admin</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="user-info">Signed in as <span class="user-name" id="userName">—</span></span>
+      <button class="btn btn-secondary btn-sm" id="signOutBtn" onclick="signOut()" style="display:none">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-icon">🛡️</div>
+    <h2>Admin Access</h2>
+    <p>Sign in with your mySMB Microsoft account to manage the AI Studio agent catalog.</p>
+    <button class="btn-signin" onclick="signIn()">
+      <svg width="18" height="18" viewBox="0 0 21 21" fill="none"><path d="M10 0H0v10h10V0z" fill="#f25022"/><path d="M21 0H11v10h10V0z" fill="#7fba00"/><path d="M10 11H0v10h10V11z" fill="#00a4ef"/><path d="M21 11H11v10h10V11z" fill="#ffb900"/></svg>
+      Sign in with Microsoft
+    </button>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="appScreen">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div>
+        <div class="page-title">Agent Catalog</div>
+        <div class="page-subtitle">Manage published agents — changes reflect on the public catalog within ~60 seconds</div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">+ Add Agent</button>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toolbar-inner">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="adminSearch" placeholder="Search agents…" oninput="renderTable()">
+      </div>
+      <select class="filter-select" id="filterStatus" onchange="renderTable()">
+        <option value="all">All statuses</option>
+        <option value="available">Available</option>
+        <option value="in_build">In Build</option>
+        <option value="backlog">Backlog</option>
+        <option value="draft">Draft</option>
+      </select>
+      <select class="filter-select" id="filterPublished" onchange="renderTable()">
+        <option value="all">Published &amp; Drafts</option>
+        <option value="true">Published only</option>
+        <option value="false">Unpublished only</option>
+      </select>
+      <span class="agent-count" id="adminCount"></span>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <div id="tableState" class="state-message">
+      <div class="spinner"></div>
+      <p>Loading agents…</p>
+    </div>
+    <table id="agentTable" class="hidden">
+      <thead>
+        <tr>
+          <th>Agent Name</th>
+          <th>Industry</th>
+          <th>Tier</th>
+          <th>Status</th>
+          <th>Published</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add Agent</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Agent Name *</label>
+          <input type="text" id="fName" placeholder="e.g. Lease Renewal Reminder Agent">
+        </div>
+        <div class="form-group">
+          <label>Industry *</label>
+          <select id="fIndustry">
+            <option value="">Select industry…</option>
+            <option>Property & Real Estate</option>
+            <option>Healthcare & Aged Care</option>
+            <option>Financial Services</option>
+            <option>Legal & Professional Services</option>
+            <option>Education</option>
+            <option>Retail & eCommerce</option>
+            <option>Government & Local Council</option>
+            <option>Construction & Trades</option>
+            <option>Agriculture & Agribusiness</option>
+            <option>HR & Workforce</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tier *</label>
+          <select id="fTier" onchange="autoPoints()">
+            <option value="">Select tier…</option>
+            <option value="Prompt Agent">Prompt Agent</option>
+            <option value="Connected Agent">Connected Agent</option>
+            <option value="Orchestration Agent">Orchestration Agent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Points</label>
+          <input type="text" id="fPoints" placeholder="Auto-fills from tier">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Use Case Type *</label>
+          <select id="fUseCaseType">
+            <option value="">Select type…</option>
+            <option>Automation</option>
+            <option>AI Workflow</option>
+            <option>Agent</option>
+            <option>Copilot-Assisted</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="fStatus">
+            <option value="draft">Draft</option>
+            <option value="available">Available</option>
+            <option value="in_build">In Build</option>
+            <option value="backlog">Backlog</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description *</label>
+        <textarea id="fDescription" placeholder="Public-facing description of what the agent does…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>AU Compliance Context</label>
+        <textarea id="fAUContext" placeholder="AU-specific compliance, legislation, or context…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Copilot Studio Build Notes</label>
+        <textarea id="fBuildNotes" placeholder="Trigger type, topic structure, connectors…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Connectors / Features</label>
+        <textarea id="fConnectors" placeholder="Comma-separated connector and feature list…" style="min-height:60px"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Upsell Path</label>
+        <input type="text" id="fUpsellPath" placeholder="e.g. Add Dataverse property register → Tier 5">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAgent()">Save Agent</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const MSAL_CONFIG = {
+  auth: {
+    clientId: '<ADMIN_APP_CLIENT_ID>',
+    authority: 'https://login.microsoftonline.com/<TENANT_ID>',
+    redirectUri: window.location.origin + window.location.pathname,
+  },
+  cache: { cacheLocation: 'sessionStorage' },
+};
+
+const GRAPH_SCOPES  = ['Sites.ReadWrite.All'];
+const SITE_ID       = '<SHAREPOINT_SITE_ID>';
+const LIST_ID       = '<LIST_ID>';
+const GRAPH_BASE    = `https://graph.microsoft.com/v1.0/sites/${SITE_ID}/lists/${LIST_ID}`;
+
+// ── MSAL ──────────────────────────────────────────────────────────────────────
+const msalApp = new msal.PublicClientApplication(MSAL_CONFIG);
+let currentAccount = null;
+
+async function initMsal() {
+  await msalApp.initialize();
+  const response = await msalApp.handleRedirectPromise();
+  if (response) {
+    currentAccount = response.account;
+  } else {
+    const accounts = msalApp.getAllAccounts();
+    if (accounts.length > 0) currentAccount = accounts[0];
+  }
+
+  if (currentAccount) {
+    showApp();
+  }
+}
+
+async function signIn() {
+  await msalApp.loginRedirect({ scopes: GRAPH_SCOPES });
+}
+
+function signOut() {
+  msalApp.logoutRedirect({ account: currentAccount });
+}
+
+async function getToken() {
+  const request = { scopes: GRAPH_SCOPES, account: currentAccount };
+  try {
+    const result = await msalApp.acquireTokenSilent(request);
+    return result.accessToken;
+  } catch {
+    const result = await msalApp.acquireTokenRedirect(request);
+    return result?.accessToken;
+  }
+}
+
+async function graphFetch(url, options = {}) {
+  const token = await getToken();
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Graph error ${res.status}: ${err}`);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+// ── APP INIT ──────────────────────────────────────────────────────────────────
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  document.getElementById('userName').textContent = currentAccount.name || currentAccount.username;
+  document.getElementById('signOutBtn').style.display = '';
+  loadAgents();
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let AGENTS = []; // raw SharePoint items: { id, fields: {...} }
+
+// ── LOAD ALL AGENTS ───────────────────────────────────────────────────────────
+async function loadAgents() {
+  document.getElementById('tableState').innerHTML = '<div class="spinner"></div><p>Loading agents…</p>';
+  document.getElementById('tableState').style.display = 'block';
+  document.getElementById('agentTable').classList.add('hidden');
+
+  try {
+    const data = await graphFetch(
+      `${GRAPH_BASE}/items?expand=fields&$top=500&$select=id,fields`
+    );
+    AGENTS = data.value;
+    renderTable();
+    document.getElementById('tableState').style.display = 'none';
+    document.getElementById('agentTable').classList.remove('hidden');
+  } catch (err) {
+    document.getElementById('tableState').innerHTML =
+      `<p>⚠️ Failed to load agents: ${err.message}</p>
+       <button class="btn btn-ghost" style="margin-top:16px" onclick="loadAgents()">Retry</button>`;
+  }
+}
+
+// ── RENDER TABLE ──────────────────────────────────────────────────────────────
+const TIER_CLASS = { 'Prompt Agent': 't1', 'Connected Agent': 't3', 'Orchestration Agent': 't5' };
+
+function renderTable() {
+  const q        = document.getElementById('adminSearch').value.toLowerCase();
+  const fStatus  = document.getElementById('filterStatus').value;
+  const fPub     = document.getElementById('filterPublished').value;
+
+  const filtered = AGENTS.filter(item => {
+    const f = item.fields;
+    const name = (f.Title || '').toLowerCase();
+    const ind  = (f.Industry || '').toLowerCase();
+    if (q && !name.includes(q) && !ind.includes(q)) return false;
+    if (fStatus !== 'all' && f.Status !== fStatus) return false;
+    if (fPub === 'true'  && !f.Published) return false;
+    if (fPub === 'false' &&  f.Published) return false;
+    return true;
+  });
+
+  document.getElementById('adminCount').textContent = `${filtered.length} of ${AGENTS.length} agents`;
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  filtered.forEach(item => {
+    const f  = item.fields;
+    const tc = TIER_CLASS[f.Tier] || 't3';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="td-name">${f.Title || '—'}</div>
+        <div class="td-desc">${f.Description || ''}</div>
+      </td>
+      <td>${f.Industry || '—'}</td>
+      <td><span class="tier-badge ${tc}">${f.Tier || '—'}</span></td>
+      <td>
+        <select class="status-select ${f.Status || 'draft'}"
+                onchange="updateStatus('${item.id}', this)"
+                data-id="${item.id}">
+          <option value="available" ${f.Status==='available'?'selected':''}>Available</option>
+          <option value="in_build"  ${f.Status==='in_build' ?'selected':''}>In Build</option>
+          <option value="backlog"   ${f.Status==='backlog'  ?'selected':''}>Coming Soon</option>
+          <option value="draft"     ${f.Status==='draft'    ?'selected':''}>Draft</option>
+        </select>
+      </td>
+      <td>
+        <div class="toggle-wrap">
+          <button class="toggle ${f.Published ? 'on' : ''}"
+                  onclick="togglePublished('${item.id}', this)"
+                  title="${f.Published ? 'Published — click to unpublish' : 'Unpublished — click to publish'}">
+          </button>
+          <span class="toggle-label">${f.Published ? 'Published' : 'Draft'}</span>
+        </div>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button class="btn btn-ghost btn-sm" onclick="openModal('${item.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="softDelete('${item.id}')">Remove</button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── STATUS UPDATE ─────────────────────────────────────────────────────────────
+async function updateStatus(itemId, selectEl) {
+  const newStatus = selectEl.value;
+  selectEl.className = `status-select ${newStatus}`;
+  try {
+    await graphFetch(`${GRAPH_BASE}/items/${itemId}/fields`, {
+      method: 'PATCH',
+      body: JSON.stringify({ Status: newStatus }),
+    });
+    const item = AGENTS.find(a => a.id === itemId);
+    if (item) item.fields.Status = newStatus;
+    toast('Status updated', 'success');
+  } catch (err) {
+    toast(`Failed to update status: ${err.message}`, 'error');
+    await loadAgents();
+  }
+}
+
+// ── TOGGLE PUBLISHED ──────────────────────────────────────────────────────────
+async function togglePublished(itemId, btn) {
+  const isOn = btn.classList.contains('on');
+  const newValue = !isOn;
+  btn.classList.toggle('on', newValue);
+  const label = btn.nextElementSibling;
+  label.textContent = newValue ? 'Published' : 'Draft';
+
+  try {
+    await graphFetch(`${GRAPH_BASE}/items/${itemId}/fields`, {
+      method: 'PATCH',
+      body: JSON.stringify({ Published: newValue }),
+    });
+    const item = AGENTS.find(a => a.id === itemId);
+    if (item) item.fields.Published = newValue;
+    toast(newValue ? 'Agent published' : 'Agent unpublished', 'success');
+  } catch (err) {
+    btn.classList.toggle('on', isOn);
+    label.textContent = isOn ? 'Published' : 'Draft';
+    toast(`Failed: ${err.message}`, 'error');
+  }
+}
+
+// ── SOFT DELETE ───────────────────────────────────────────────────────────────
+async function softDelete(itemId) {
+  const item = AGENTS.find(a => a.id === itemId);
+  const name = item?.fields?.Title || 'this agent';
+  if (!confirm(`Remove "${name}" from the catalog? This sets it to Draft + Unpublished. It can be restored from SharePoint.`)) return;
+
+  try {
+    await graphFetch(`${GRAPH_BASE}/items/${itemId}/fields`, {
+      method: 'PATCH',
+      body: JSON.stringify({ Status: 'draft', Published: false }),
+    });
+    if (item) { item.fields.Status = 'draft'; item.fields.Published = false; }
+    renderTable();
+    toast('Agent removed from catalog', 'success');
+  } catch (err) {
+    toast(`Failed: ${err.message}`, 'error');
+  }
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+let editingId = null;
+
+function openModal(itemId = null) {
+  editingId = itemId;
+  const overlay = document.getElementById('modalOverlay');
+  document.getElementById('modalTitle').textContent = itemId ? 'Edit Agent' : 'Add Agent';
+
+  if (itemId) {
+    const item = AGENTS.find(a => a.id === itemId);
+    const f = item?.fields || {};
+    document.getElementById('fName').value        = f.Title        || '';
+    document.getElementById('fIndustry').value    = f.Industry     || '';
+    document.getElementById('fTier').value         = f.Tier         || '';
+    document.getElementById('fPoints').value       = f.Points       || '';
+    document.getElementById('fUseCaseType').value  = f.UseCaseType  || '';
+    document.getElementById('fStatus').value       = f.Status       || 'draft';
+    document.getElementById('fDescription').value  = f.Description  || '';
+    document.getElementById('fAUContext').value    = f.AUContext    || '';
+    document.getElementById('fBuildNotes').value   = f.BuildNotes   || '';
+    document.getElementById('fConnectors').value   = f.Connectors   || '';
+    document.getElementById('fUpsellPath').value   = f.UpsellPath   || '';
+  } else {
+    ['fName','fIndustry','fTier','fPoints','fUseCaseType','fDescription',
+     'fAUContext','fBuildNotes','fConnectors','fUpsellPath'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('fStatus').value = 'draft';
+  }
+
+  overlay.classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  editingId = null;
+}
+
+function autoPoints() {
+  const tier = document.getElementById('fTier').value;
+  const map = { 'Prompt Agent': '1', 'Connected Agent': '3', 'Orchestration Agent': '5' };
+  if (map[tier]) document.getElementById('fPoints').value = map[tier];
+}
+
+async function saveAgent() {
+  const name = document.getElementById('fName').value.trim();
+  const industry = document.getElementById('fIndustry').value;
+  const tier = document.getElementById('fTier').value;
+  const useCaseType = document.getElementById('fUseCaseType').value;
+  const description = document.getElementById('fDescription').value.trim();
+
+  if (!name || !industry || !tier || !useCaseType || !description) {
+    toast('Please fill in all required fields (*)', 'error');
+    return;
+  }
+
+  const fields = {
+    Title:       name,
+    Industry:    industry,
+    Tier:        tier,
+    Points:      parseInt(document.getElementById('fPoints').value) || 0,
+    UseCaseType: useCaseType,
+    Status:      document.getElementById('fStatus').value,
+    Description: description,
+    AUContext:   document.getElementById('fAUContext').value.trim(),
+    BuildNotes:  document.getElementById('fBuildNotes').value.trim(),
+    Connectors:  document.getElementById('fConnectors').value.trim(),
+    UpsellPath:  document.getElementById('fUpsellPath').value.trim(),
+  };
+
+  try {
+    if (editingId) {
+      await graphFetch(`${GRAPH_BASE}/items/${editingId}/fields`, {
+        method: 'PATCH',
+        body: JSON.stringify(fields),
+      });
+      const item = AGENTS.find(a => a.id === editingId);
+      if (item) item.fields = { ...item.fields, ...fields };
+      toast('Agent updated', 'success');
+    } else {
+      const result = await graphFetch(`${GRAPH_BASE}/items`, {
+        method: 'POST',
+        body: JSON.stringify({ fields }),
+      });
+      AGENTS.push(result);
+      toast('Agent added', 'success');
+    }
+    closeModal();
+    renderTable();
+  } catch (err) {
+    toast(`Failed to save: ${err.message}`, 'error');
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer = null;
+function toast(message, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = message;
+  el.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 3000);
+}
+
+// ── KEYBOARD ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+initMsal().catch(console.error);
+</script>
+</body>
+</html>

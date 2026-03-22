@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Studio — Agent Catalog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:      #34DFBA;
+    --teal-mid:  #81EBD4;
+    --teal-pale: #B2EDE3;
+    --cream:     #F2F1ED;
+    --dark:      #1A1A2E;
+    --ink:       #212529;
+    --muted:     #6B7280;
+    --border:    #E2E0D8;
+    --t1-bg:     #EAF3DE; --t1:  #3B6D11;
+    --t3-bg:     #FAEEDA; --t3:  #854F0B;
+    --t5-bg:     #FCEBEB; --t5:  #A32D2D;
+    --radius:    10px;
+    --shadow:    0 2px 12px rgba(0,0,0,.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,.14);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--dark);
+    color: white;
+    padding: 0 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    gap: 20px;
+  }
+  .logo-block { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .logo-m {
+    width: 34px; height: 34px;
+    background: var(--teal);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px; color: var(--dark); font-weight: 900;
+  }
+  .logo-text { font-size: 15px; font-weight: 600; letter-spacing: .01em; }
+  .logo-sub  { font-size: 11px; color: var(--teal-pale); letter-spacing: .08em; text-transform: uppercase; }
+
+  .header-search {
+    flex: 1; max-width: 480px;
+    display: flex; align-items: center;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 8px;
+    padding: 0 14px;
+    gap: 8px;
+  }
+  .header-search input {
+    flex: 1; background: none; border: none; outline: none;
+    color: white; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; padding: 10px 0;
+  }
+  .header-search input::placeholder { color: rgba(255,255,255,.4); }
+  .search-icon { color: rgba(255,255,255,.4); font-size: 16px; }
+
+  .header-cta {
+    flex-shrink: 0;
+    background: var(--teal);
+    color: var(--dark);
+    border: none;
+    border-radius: 7px;
+    padding: 9px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .header-cta:hover { opacity: .85; }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--dark);
+    color: white;
+    padding: 56px 40px 64px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.1;
+    margin-bottom: 16px;
+    letter-spacing: -.01em;
+  }
+  .hero h1 em { color: var(--teal); font-style: italic; }
+  .hero p {
+    color: rgba(255,255,255,.65);
+    font-size: 16px;
+    max-width: 560px;
+    margin: 0 auto 36px;
+    line-height: 1.6;
+  }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px; color: var(--teal);
+    display: block; line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: .08em; color: rgba(255,255,255,.45);
+    margin-top: 4px;
+  }
+
+  /* ── FILTERS ── */
+  .filters-bar {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    position: sticky;
+    top: 64px;
+    z-index: 90;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .filters-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 0; flex-wrap: wrap;
+  }
+  .filter-label { font-size: 12px; color: var(--muted); font-weight: 500; margin-right: 4px; white-space: nowrap; }
+
+  .pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+  .pill:hover { border-color: var(--teal); color: var(--teal); }
+  .pill.active { background: var(--dark); border-color: var(--dark); color: white; }
+  .pill.tier-1.active  { background: var(--t1); border-color: var(--t1); color: white; }
+  .pill.tier-3.active  { background: var(--t3); border-color: var(--t3); color: white; }
+  .pill.tier-5.active  { background: var(--t5); border-color: var(--t5); color: white; }
+
+  .filter-divider { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+
+  .result-count {
+    margin-left: auto;
+    font-size: 12px; color: var(--muted);
+    white-space: nowrap;
+  }
+  .result-count strong { color: var(--ink); }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 40px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  /* Industry group headings */
+  .industry-group { display: contents; }
+  .industry-heading {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 0 4px;
+  }
+  .industry-heading-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--dark);
+  }
+  .industry-count {
+    background: var(--dark);
+    color: white;
+    font-size: 11px; font-weight: 600;
+    border-radius: 20px;
+    padding: 2px 9px;
+  }
+  .industry-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* Agent grid */
+  .cards-grid {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    padding: 20px;
+    cursor: pointer;
+    transition: all .18s;
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--border);
+    transition: background .18s;
+  }
+  .card.tier-1::before { background: var(--t1); }
+  .card.tier-3::before { background: var(--t3); }
+  .card.tier-5::before { background: var(--t5); }
+  .card:hover {
+    border-color: var(--teal);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .card-title  { font-size: 14px; font-weight: 600; line-height: 1.35; color: var(--dark); }
+  .tier-badge  {
+    flex-shrink: 0;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px;
+    letter-spacing: .02em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tier-badge.t1 { background: var(--t1-bg); color: var(--t1); }
+  .tier-badge.t3 { background: var(--t3-bg); color: var(--t3); }
+  .tier-badge.t5 { background: var(--t5-bg); color: var(--t5); }
+
+  .card-desc {
+    font-size: 12.5px; color: var(--muted); line-height: 1.55;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; margin-top: auto;
+  }
+  .use-case-tag {
+    font-size: 10px; font-weight: 600;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .card-pts {
+    font-size: 11px; font-weight: 700;
+    color: var(--teal);
+    letter-spacing: .02em;
+  }
+  .card-arrow { font-size: 14px; color: var(--border); transition: color .15s; }
+  .card:hover .card-arrow { color: var(--teal); }
+
+  /* ── STATUS BADGE ── */
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .status-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .8;
+  }
+  .status-available  { color: #0a8a66; background: rgba(52,223,186,.12); }
+  .status-in_build   { color: #b45309; background: rgba(245,158,11,.12); }
+  .status-backlog    { color: #9CA3AF; background: rgba(156,163,175,.12); }
+
+  /* ── LOADING STATE ── */
+  .loading-state {
+    grid-column: 1 / -1;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 80px 40px; gap: 20px;
+    color: var(--muted);
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── ERROR STATE ── */
+  .error-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--muted);
+  }
+  .error-state .em { font-size: 48px; margin-bottom: 16px; }
+  .error-state p { font-size: 16px; margin-bottom: 20px; }
+  .btn-retry {
+    background: var(--dark); color: white;
+    border: none; border-radius: 8px;
+    padding: 10px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: opacity .15s;
+  }
+  .btn-retry:hover { opacity: .85; }
+
+  /* ── DETAIL PANEL ── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+
+  .panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: min(580px, 100vw);
+    background: white;
+    z-index: 210;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform .25s cubic-bezier(.4,0,.2,1);
+    box-shadow: -8px 0 40px rgba(0,0,0,.15);
+  }
+  .panel.open { transform: translateX(0); }
+
+  .panel-top {
+    background: var(--dark);
+    padding: 28px 28px 24px;
+    position: sticky; top: 0; z-index: 5;
+  }
+  .panel-close {
+    position: absolute; top: 16px; right: 20px;
+    background: rgba(255,255,255,.12);
+    border: none; border-radius: 6px;
+    color: white; cursor: pointer;
+    width: 32px; height: 32px;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .panel-close:hover { background: rgba(255,255,255,.2); }
+  .panel-industry {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--teal); font-weight: 600; margin-bottom: 8px;
+  }
+  .panel-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: white; line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .panel-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .panel-badge {
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px;
+    text-transform: uppercase; letter-spacing: .03em;
+  }
+  .panel-badge.t1 { background: var(--t1-bg); color: var(--t1); }
+  .panel-badge.t3 { background: var(--t3-bg); color: var(--t3); }
+  .panel-badge.t5 { background: var(--t5-bg); color: var(--t5); }
+  .panel-badge.pts { background: rgba(52,223,186,.15); color: var(--teal); }
+  .panel-badge.uc  { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); }
+
+  .panel-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+
+  .section-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .section-text { font-size: 13.5px; line-height: 1.65; color: var(--ink); }
+
+  .info-box {
+    background: var(--cream);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .info-box-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .info-box-row:last-child { margin-bottom: 0; }
+  .info-box-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .info-box-text { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  .info-box-text strong { color: var(--ink); font-weight: 600; }
+
+  .upsell-box {
+    background: linear-gradient(135deg, rgba(52,223,186,.08), rgba(52,223,186,.03));
+    border: 1.5px solid var(--teal-pale);
+    border-radius: var(--radius); padding: 16px;
+  }
+  .upsell-box .section-label { color: var(--teal); }
+  .upsell-box .section-text { color: var(--ink); font-size: 13px; }
+
+  .panel-actions {
+    display: flex; gap: 10px;
+    padding: 0 28px 28px;
+  }
+  .btn-primary {
+    flex: 1; background: var(--dark); color: white;
+    border: none; border-radius: 8px;
+    padding: 13px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn-primary:hover { opacity: .85; }
+  .btn-secondary {
+    flex: 1; background: white; color: var(--dark);
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 13px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: border-color .15s;
+  }
+  .btn-secondary:hover { border-color: var(--teal); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--muted);
+  }
+  .empty-state p { font-size: 16px; }
+  .empty-state .em { font-size: 48px; margin-bottom: 16px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dark); color: rgba(255,255,255,.4);
+    text-align: center; padding: 28px;
+    font-size: 12px; margin-top: 40px;
+  }
+  footer strong { color: var(--teal); }
+
+  /* ── HIDDEN ── */
+  .hidden { display: none !important; }
+
+  @media (max-width: 768px) {
+    header, .filters-bar, .main { padding-left: 16px; padding-right: 16px; }
+    .hero { padding: 40px 16px; }
+    .hero-stats { gap: 24px; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .panel-actions { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo-block">
+      <div class="logo-m">m</div>
+      <div>
+        <div class="logo-text">mySMB</div>
+        <div class="logo-sub">AI Studio</div>
+      </div>
+    </div>
+    <div class="header-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search agents, industries, or use cases…" autocomplete="off">
+    </div>
+    <button class="header-cta" onclick="openRequest()">+ Request an Agent</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>What can AI do<br>for <em>your</em> business?</h1>
+  <p>Browse production-ready AI agents built for Australian businesses — filter by industry, complexity tier, and use case.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num" id="statAgents">—</span><div class="stat-label">Agents</div></div>
+    <div class="stat"><span class="stat-num">10</span><div class="stat-label">Industries</div></div>
+    <div class="stat"><span class="stat-num">3</span><div class="stat-label">Complexity Tiers</div></div>
+    <div class="stat"><span class="stat-num">AU</span><div class="stat-label">Compliant</div></div>
+  </div>
+</section>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <div class="filters-inner">
+    <span class="filter-label">Industry</span>
+    <button class="pill active" data-filter="industry" data-value="all">All</button>
+    <button class="pill" data-filter="industry" data-value="Property & Real Estate">Property</button>
+    <button class="pill" data-filter="industry" data-value="Healthcare & Aged Care">Healthcare</button>
+    <button class="pill" data-filter="industry" data-value="Financial Services">Financial</button>
+    <button class="pill" data-filter="industry" data-value="Legal & Professional Services">Legal</button>
+    <button class="pill" data-filter="industry" data-value="Education">Education</button>
+    <button class="pill" data-filter="industry" data-value="Retail & eCommerce">Retail</button>
+    <button class="pill" data-filter="industry" data-value="Government & Local Council">Government</button>
+    <button class="pill" data-filter="industry" data-value="Construction & Trades">Construction</button>
+    <button class="pill" data-filter="industry" data-value="Agriculture & Agribusiness">Agriculture</button>
+    <button class="pill" data-filter="industry" data-value="HR & Workforce">HR</button>
+    <div class="filter-divider"></div>
+    <span class="filter-label">Tier</span>
+    <button class="pill tier-1 active" data-filter="tier" data-value="all">All</button>
+    <button class="pill tier-1" data-filter="tier" data-value="Prompt Agent">Prompt</button>
+    <button class="pill tier-3" data-filter="tier" data-value="Connected Agent">Connected</button>
+    <button class="pill tier-5" data-filter="tier" data-value="Orchestration Agent">Orchestration</button>
+    <span class="result-count" id="resultCount"></span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main" id="catalog"></main>
+
+<!-- OVERLAY + PANEL -->
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="panel-top">
+    <button class="panel-close" onclick="closePanel()">✕</button>
+    <div class="panel-industry" id="panelIndustry"></div>
+    <div class="panel-title" id="panelTitle"></div>
+    <div class="panel-badges" id="panelBadges"></div>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+  <div class="panel-actions">
+    <button class="btn-primary" onclick="openRequest()">Request this Agent</button>
+    <button class="btn-secondary" onclick="closePanel()">Back to Catalog</button>
+  </div>
+</div>
+
+<footer>
+  <strong>mySMB AI Studio</strong> &nbsp;·&nbsp; Production-ready AI agents for Australian businesses &nbsp;·&nbsp; Built on Microsoft Copilot Studio
+</footer>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const API_URL = 'https://<your-functionapp>.azurewebsites.net/api/agents';
+
+// ── TIER MAPS ────────────────────────────────────────────────────────────────
+const TIER_CLASS = { 'Prompt Agent': 't1', 'Connected Agent': 't3', 'Orchestration Agent': 't5' };
+const TIER_LABEL = { 'Prompt Agent': 'Prompt · 1pt', 'Connected Agent': 'Connected · 3pt', 'Orchestration Agent': 'Orchestration · 5pt' };
+const CARD_TIER  = { 'Prompt Agent': 'tier-1', 'Connected Agent': 'tier-3', 'Orchestration Agent': 'tier-5' };
+
+// ── STATUS BADGE ─────────────────────────────────────────────────────────────
+const STATUS_CONFIG = {
+  available: { label: 'Live',         cls: 'status-available' },
+  in_build:  { label: 'In Build',     cls: 'status-in_build'  },
+  backlog:   { label: 'Coming Soon',  cls: 'status-backlog'   },
+};
+
+function statusBadge(status) {
+  const cfg = STATUS_CONFIG[status];
+  if (!cfg) return '';
+  return `<span class="status-badge ${cfg.cls}">${cfg.label}</span>`;
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let AGENTS = [];
+let activeIndustry = 'all', activeTier = 'all', searchQ = '';
+
+// ── DATA LOADING ─────────────────────────────────────────────────────────────
+async function loadAgents() {
+  const catalog = document.getElementById('catalog');
+  catalog.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Loading agents…</p></div>';
+  document.getElementById('resultCount').innerHTML = '';
+
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // Map API shape → internal shape used by render()
+    AGENTS = data.map(a => ({
+      'Industry':                a.industry,
+      'Agent Name':              a.name,
+      'Tier':                    a.tier,
+      'Points':                  a.points,
+      'Use Case Type':           a.useCaseType,
+      'Description':             a.description,
+      'AU-Specific Context':     a.auContext,
+      'Copilot Studio Build Notes': a.buildNotes,
+      'Connectors / Features':   a.connectors,
+      'Upsell Path':             a.upsellPath,
+      'Status':                  a.status,
+    }));
+
+    document.getElementById('statAgents').textContent = AGENTS.length;
+    render();
+  } catch (err) {
+    console.error('Failed to load agents:', err);
+    catalog.innerHTML = `
+      <div class="error-state">
+        <div class="em">⚠️</div>
+        <p>Could not load the agent catalog. Please check your connection and try again.</p>
+        <button class="btn-retry" onclick="loadAgents()">Retry</button>
+      </div>`;
+    document.getElementById('resultCount').innerHTML = '';
+  }
+}
+
+// ── FILTER ───────────────────────────────────────────────────────────────────
+function getFiltered() {
+  return AGENTS.filter(a => {
+    const matchInd  = activeIndustry === 'all' || a['Industry'] === activeIndustry;
+    const matchTier = activeTier === 'all' || a['Tier'] === activeTier;
+    const q = searchQ.toLowerCase();
+    const matchQ = !q || [a['Agent Name'], a['Industry'], a['Description'], a['Use Case Type'], a['Connectors / Features']].some(f => f && f.toLowerCase().includes(q));
+    return matchInd && matchTier && matchQ;
+  });
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  const filtered = getFiltered();
+  const catalog = document.getElementById('catalog');
+  document.getElementById('resultCount').innerHTML = `<strong>${filtered.length}</strong> agents`;
+
+  if (!filtered.length) {
+    catalog.innerHTML = '<div class="empty-state"><div class="em">🔍</div><p>No agents match your filters. Try broadening your search.</p></div>';
+    return;
+  }
+
+  // Group by industry
+  const byInd = {};
+  filtered.forEach(a => {
+    if (!byInd[a['Industry']]) byInd[a['Industry']] = [];
+    byInd[a['Industry']].push(a);
+  });
+
+  catalog.innerHTML = '';
+  Object.entries(byInd).forEach(([ind, agents]) => {
+    const heading = document.createElement('div');
+    heading.className = 'industry-heading';
+    heading.innerHTML = `<span class="industry-heading-text">${ind}</span><span class="industry-count">${agents.length}</span><div class="industry-line"></div>`;
+    catalog.appendChild(heading);
+
+    const grid = document.createElement('div');
+    grid.className = 'cards-grid';
+    agents.forEach((a, i) => {
+      const tc = TIER_CLASS[a['Tier']] || 't3';
+      const cc = CARD_TIER[a['Tier']] || 'tier-3';
+      const card = document.createElement('div');
+      card.className = `card ${cc}`;
+      card.style.animationDelay = `${i * 0.04}s`;
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-title">${a['Agent Name']}</div>
+          <span class="tier-badge ${tc}">${TIER_LABEL[a['Tier']]}</span>
+        </div>
+        <div class="card-desc">${a['Description']}</div>
+        <div class="card-footer">
+          <span class="use-case-tag">${a['Use Case Type']}</span>
+          ${statusBadge(a['Status'])}
+          <span class="card-arrow">→</span>
+        </div>`;
+      card.onclick = () => openPanel(a);
+      grid.appendChild(card);
+    });
+    catalog.appendChild(grid);
+  });
+}
+
+// ── PANEL ─────────────────────────────────────────────────────────────────────
+function openPanel(a) {
+  const tc = TIER_CLASS[a['Tier']] || 't3';
+  document.getElementById('panelIndustry').textContent = a['Industry'];
+  document.getElementById('panelTitle').textContent = a['Agent Name'];
+  document.getElementById('panelBadges').innerHTML = `
+    <span class="panel-badge ${tc}">${a['Tier']}</span>
+    <span class="panel-badge pts">${a['Points']} point${a['Points'] > 1 ? 's' : ''}</span>
+    <span class="panel-badge uc">${a['Use Case Type']}</span>
+    ${statusBadge(a['Status'])}`;
+
+  document.getElementById('panelBody').innerHTML = `
+    <div>
+      <div class="section-label">What it does</div>
+      <div class="section-text">${a['Description']}</div>
+    </div>
+    <div class="info-box">
+      <div class="info-box-row">
+        <span class="info-box-icon">🇦🇺</span>
+        <div class="info-box-text"><strong>AU Compliance Context</strong><br>${a['AU-Specific Context']}</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">How it's built</div>
+      <div class="section-text">${a['Copilot Studio Build Notes']}</div>
+    </div>
+    <div class="info-box">
+      <div class="info-box-row">
+        <span class="info-box-icon">🔌</span>
+        <div class="info-box-text"><strong>Connectors &amp; Features</strong><br>${a['Connectors / Features']}</div>
+      </div>
+    </div>
+    <div class="upsell-box">
+      <div class="section-label">Upsell path</div>
+      <div class="section-text">${a['Upsell Path']}</div>
+    </div>`;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePanel() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('panel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openRequest() {
+  window.open('https://teams.microsoft.com/l/channel/your-channel-link', '_blank');
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+document.querySelectorAll('[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.filter, v = btn.dataset.value;
+    document.querySelectorAll(`[data-filter="${f}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (f === 'industry') activeIndustry = v;
+    else activeTier = v;
+    render();
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQ = e.target.value;
+  render();
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadAgents();
+</script>
+</body>
+</html>
