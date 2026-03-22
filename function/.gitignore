@@ -1,0 +1,5 @@
+/dist/
+/getAgents/
+/node_modules/
+local.settings.json
+package-lock.json

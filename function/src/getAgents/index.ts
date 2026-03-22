@@ -13,7 +13,7 @@ interface SharePointFields {
   Connectors?: string;
   UpsellPath?: string;
   Status?: string;
-  Published?: boolean;
+  Published?: boolean | string;
 }
 
 interface SharePointItem {
@@ -97,8 +97,7 @@ const httpTrigger: AzureFunction = async function (
 
     const url =
       `https://graph.microsoft.com/v1.0/sites/${siteId}/lists/${listId}/items` +
-      `?expand=fields` +
-      `&$filter=fields/Published eq true` +
+      `?$expand=fields` +
       `&$select=id,fields` +
       `&$top=500`;
 
@@ -121,7 +120,12 @@ const httpTrigger: AzureFunction = async function (
     }
 
     const data = (await response.json()) as { value: SharePointItem[] };
-    const agents: Agent[] = data.value.map(mapItem);
+    const agents: Agent[] = data.value
+      .filter((item) => {
+        const p = item.fields.Published;
+        return p === true || p === "Yes" || p === "True";
+      })
+      .map(mapItem);
 
     context.res = {
       status: 200,

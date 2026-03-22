@@ -25,14 +25,24 @@ jobs:
         working-directory: function
         run: npm install
 
-      - name: Compile TypeScript
+      - name: Build (compile TypeScript + copy function.json)
         working-directory: function
         run: npm run build
 
+      - name: Create deployment zip
+        working-directory: function
+        run: zip -r ../function.zip . -x "src/*" -x "tsconfig.json" -x ".gitignore" -x "*.DS_Store"
+
       - name: Deploy to Azure Functions
-        uses: Azure/functions-action@v1
+        uses: azure/login@v2
         with:
-          app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME }}
-          package: ./function
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-          scm-do-build-during-deployment: false
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Upload zip to Azure
+        run: |
+          az webapp deploy \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --name ${{ secrets.AZURE_FUNCTIONAPP_NAME }} \
+            --src-path function.zip \
+            --type zip \
+            --clean true
