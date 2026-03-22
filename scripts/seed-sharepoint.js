@@ -95,6 +95,7 @@ function mapToFields(agent) {
     Connectors:  agent['Connectors / Features'],
     UpsellPath:  agent['Upsell Path'],
     Status:      'available',
+    Published:   true,
   };
 }
 
