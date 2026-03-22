@@ -11,9 +11,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: function
 
     steps:
       - name: Checkout repository
@@ -25,15 +22,17 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
+        working-directory: function
         run: npm install
 
       - name: Compile TypeScript
+        working-directory: function
         run: npm run build
 
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME }}
-          package: function
+          package: ./function
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-          respect-funcignore: true
+          scm-do-build-during-deployment: false
