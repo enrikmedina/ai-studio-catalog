@@ -1,11 +1,11 @@
 {
   "routes": [
     {
-      "route": "/login.html",
+      "route": "/public/login.html",
       "allowedRoles": ["anonymous", "authenticated"]
     },
     {
-      "route": "/logged-out.html",
+      "route": "/public/logged-out.html",
       "allowedRoles": ["anonymous", "authenticated"]
     },
     {
@@ -15,7 +15,7 @@
   ],
   "responseOverrides": {
     "401": {
-      "redirect": "/login.html",
+      "redirect": "/public/login.html",
       "statusCode": 302
     }
   },
