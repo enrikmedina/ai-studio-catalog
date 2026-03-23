@@ -645,23 +645,8 @@
       <div class="header-logo-tagline">Simplified AI. Human Touch.</div>
     </div>
 
-    <!-- Right: view toggle + stats + user/sign-in -->
+    <!-- Right: user greeting only -->
     <div class="header-right">
-      <div class="view-toggle">
-        <button class="view-btn active" id="viewGrid" title="Grid view">&#x229E;</button>
-        <button class="view-btn" id="viewList" title="List view">&#x2630;</button>
-      </div>
-      <div class="header-stats">
-        <div class="header-stat">
-          <span class="header-stat-num" id="statBacklog">—</span>
-          <span class="header-stat-label">Agents</span>
-        </div>
-        <div class="header-stat-sep"></div>
-        <div class="header-stat">
-          <span class="header-stat-num" id="statVariations">—</span>
-          <span class="header-stat-label">Variations</span>
-        </div>
-      </div>
       <div class="user-greeting" id="userGreeting" style="display:none">
         <div class="user-avatar" id="userAvatar"></div>
         <span class="user-name">Hi, <strong id="userName"></strong></span>
@@ -674,6 +659,22 @@
 <!-- FILTER BAR -->
 <div class="filters-bar">
   <div class="filters-inner">
+    <div class="view-toggle">
+      <button class="view-btn active" id="viewGrid" title="Grid view">&#x229E;</button>
+      <button class="view-btn" id="viewList" title="List view">&#x2630;</button>
+    </div>
+    <div class="header-stats" style="margin-right:8px">
+      <div class="header-stat">
+        <span class="header-stat-num" id="statBacklog">—</span>
+        <span class="header-stat-label" style="color:rgba(255,255,255,.45)">Agents</span>
+      </div>
+      <div class="header-stat-sep"></div>
+      <div class="header-stat">
+        <span class="header-stat-num" id="statVariations">—</span>
+        <span class="header-stat-label" style="color:rgba(255,255,255,.45)">Variations</span>
+      </div>
+    </div>
+    <div style="width:1px;height:16px;background:rgba(255,255,255,.12);margin:0 4px"></div>
     <span class="filter-type-label">Type:</span>
     <button class="type-pill active" data-type="all">All</button>
     <button class="type-pill" data-type="Automation">Automation</button>
