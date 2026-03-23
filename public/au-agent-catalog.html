@@ -741,7 +741,11 @@ function getFiltered() {
 function render() {
   const filtered = getFiltered();
   const catalog = document.getElementById('catalog');
-  document.getElementById('resultCount').innerHTML = `<strong>${filtered.length}</strong> agents`;
+  const iterTotal = filtered.reduce((sum, a) => {
+    try { return sum + JSON.parse(a['Iterations'] || '[]').length; } catch { return sum; }
+  }, 0);
+  const total = filtered.length + iterTotal;
+  document.getElementById('resultCount').innerHTML = `<strong>${total}</strong> agents`;
 
   if (!filtered.length) {
     catalog.innerHTML = '<div class="empty-state"><div class="em">🔍</div><p>No agents match your filters. Try broadening your search.</p></div>';
