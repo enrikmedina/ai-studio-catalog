@@ -462,7 +462,7 @@
   .panel-badge.t5 { background: var(--t5-bg); color: var(--t5); }
   .panel-badge.uc  { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); }
 
-  .panel-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+  .panel-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
 
   .section-label {
     font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -888,7 +888,7 @@ function renderIterations(raw) {
         ${it.description ? `<div class="iter-row"><strong>What it does</strong>${it.description}</div>` : ''}
         ${it.dataSource ? `<div class="iter-row"><strong>Data Source</strong>${it.dataSource}</div>` : ''}
         ${it.connector ? `<div class="iter-row"><strong>Connector / Method</strong>${it.connector}</div>` : ''}
-        ${it.compliance ? `<div class="iter-row"><strong>AU Compliance</strong>${it.compliance}</div>` : ''}
+        ${it.compliance ? `<div class="iter-row"><strong>AU Context</strong>${it.compliance}</div>` : ''}
         ${it.buildNotes ? `<div class="iter-row"><strong>Build Notes</strong>${it.buildNotes}</div>` : ''}
         ${it.upsell ? `<div class="iter-upsell">➔ ${it.upsell}</div>` : ''}
       </div>
@@ -922,20 +922,9 @@ function openPanel(a) {
       <div class="why-label">Why it matters</div>
       <div class="why-text">${a['Why It Matters']}</div>
     </div>` : ''}
-    <div>
-      <div class="section-label">What it does</div>
-      <div class="section-text">${a['Description']}</div>
-    </div>
-    <div class="info-box">
-      <div class="info-box-row">
-        <span class="info-box-icon">🇦🇺</span>
-        <div class="info-box-text"><strong>AU Compliance Context</strong><br>${a['AU-Specific Context']}</div>
-      </div>
-    </div>
-    <div>
-      <div class="section-label">How it's built</div>
-      <div class="section-text">${a['Copilot Studio Build Notes']}</div>
-    </div>
+    ${a['Description'] ? `<div class="iter-row"><strong>What it does</strong>${a['Description']}</div>` : ''}
+    ${a['AU-Specific Context'] ? `<div class="iter-row"><strong>AU Context</strong>${a['AU-Specific Context']}</div>` : ''}
+    ${a['Copilot Studio Build Notes'] ? `<div class="iter-row"><strong>How it's built</strong>${a['Copilot Studio Build Notes']}</div>` : ''}
     <div class="info-box">
       <div class="info-box-row">
         <span class="info-box-icon">🔌</span>
