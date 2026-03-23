@@ -355,30 +355,6 @@
   }
   .status-available  { color: #fff; background: #0a8a66; font-weight: 700; }
   .status-in_build   { color: #b45309; background: rgba(245,158,11,.15); }
-  .status-backlog    { color: #9CA3AF; background: rgba(156,163,175,.12); }
-
-  /* ── BACKLOG CARD STATE ── */
-  .card.is-backlog {
-    opacity: .6;
-    border-style: dashed;
-  }
-  .card.is-backlog::before { background: #D1D5DB; }
-  .card.is-backlog:hover {
-    opacity: .85;
-    border-color: #9CA3AF;
-    border-style: dashed;
-    box-shadow: var(--shadow);
-    transform: none;
-  }
-  .card.is-backlog .card-arrow { color: #D1D5DB; }
-  .card.is-backlog:hover .card-arrow { color: #9CA3AF; }
-
-  /* ── IN-BUILD CARD STATE ── */
-  .card.is-in_build {
-    border-color: rgba(245,158,11,.35);
-    background: rgba(255,251,245,1);
-  }
-  .card.is-in_build::before { background: #f59e0b; }
 
   /* ── LOADING STATE ── */
   .loading-state {
@@ -671,10 +647,8 @@
 <section class="hero">
   <h1>What can AI do<br>for <em>your</em> business?</h1>
   <div class="hero-stats">
-    <div class="stat"><span class="stat-num" id="statLive">—</span><div class="stat-label">Live</div></div>
-    <div class="stat"><span class="stat-num" id="statInBuild">—</span><div class="stat-label">In Build</div></div>
-    <div class="stat"><span class="stat-num" id="statBacklog">—</span><div class="stat-label">Coming Soon</div></div>
-
+    <div class="stat"><span class="stat-num" id="statBacklog">—</span><div class="stat-label">Agents to Build</div></div>
+    <div class="stat"><span class="stat-num" id="statVariations">—</span><div class="stat-label">Variations Available</div></div>
   </div>
   <div class="hero-search-wrap">
     <div class="hero-search-box">
@@ -706,14 +680,6 @@
       <option value="Prompt Agent">Prompt Agent</option>
       <option value="Connected Agent">Connected Agent</option>
       <option value="Orchestration Agent">Orchestration Agent</option>
-    </select>
-    <div class="filter-divider"></div>
-    <span class="filter-label">Status</span>
-    <select class="filter-select" id="statusSelect">
-      <option value="all">All Status</option>
-      <option value="available">Live</option>
-      <option value="in_build">In Build</option>
-      <option value="backlog">Coming Soon</option>
     </select>
     <span class="result-count" id="resultCount"></span>
   </div>
@@ -817,9 +783,12 @@ async function loadAgents() {
       'Iterations':              a.iterations,
     }));
 
-    document.getElementById('statLive').textContent    = AGENTS.filter(a => a['Status'] === 'available').length;
-    document.getElementById('statInBuild').textContent = AGENTS.filter(a => a['Status'] === 'in_build').length;
-    document.getElementById('statBacklog').textContent = AGENTS.filter(a => a['Status'] === 'backlog').length;
+    const backlogAgents = AGENTS.filter(a => a['Status'] === 'backlog');
+    document.getElementById('statBacklog').textContent = backlogAgents.length;
+    const totalVariations = backlogAgents.reduce((sum, a) => {
+      try { return sum + JSON.parse(a['Iterations'] || '[]').length; } catch { return sum; }
+    }, 0);
+    document.getElementById('statVariations').textContent = totalVariations;
     render();
   } catch (err) {
     console.error('Failed to load agents:', err);
@@ -836,12 +805,12 @@ async function loadAgents() {
 // ── FILTER ───────────────────────────────────────────────────────────────────
 function getFiltered() {
   return AGENTS.filter(a => {
-    const matchInd    = activeIndustry === 'all' || a['Industry'] === activeIndustry;
-    const matchTier   = activeTier === 'all' || a['Tier'] === activeTier;
-    const matchStatus = activeStatus === 'all' || a['Status'] === activeStatus;
+    if (a['Status'] !== 'backlog') return false;
+    const matchInd  = activeIndustry === 'all' || a['Industry'] === activeIndustry;
+    const matchTier = activeTier === 'all' || a['Tier'] === activeTier;
     const q = searchQ.toLowerCase();
     const matchQ = !q || [a['Agent Name'], a['Industry'], a['Description'], a['Use Case Type'], a['Connectors / Features']].some(f => f && f.toLowerCase().includes(q));
-    return matchInd && matchTier && matchStatus && matchQ;
+    return matchInd && matchTier && matchQ;
   });
 }
 
@@ -879,9 +848,8 @@ function render() {
     agents.forEach((a, i) => {
       const tc = TIER_CLASS[a['Tier']] || 't3';
       const cc = CARD_TIER[a['Tier']] || 'tier-3';
-      const sc = a['Status'] === 'backlog' ? 'is-backlog' : a['Status'] === 'in_build' ? 'is-in_build' : '';
       const card = document.createElement('div');
-      card.className = `card ${cc} ${sc}`;
+      card.className = `card ${cc}`;
       card.style.animationDelay = `${i * 0.04}s`;
       let iterCount = 0;
       try { iterCount = JSON.parse(a['Iterations'] || '[]').length; } catch {}
