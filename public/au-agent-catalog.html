@@ -887,8 +887,8 @@ function renderIterations(raw) {
         ${it.whyItMatters ? `<div class="iter-why">${it.whyItMatters}</div>` : ''}
         ${it.description ? `<div class="iter-row"><strong>What it does</strong>${it.description}</div>` : ''}
         ${it.dataSource ? `<div class="iter-row"><strong>Data Source</strong>${it.dataSource}</div>` : ''}
-        ${it.connector ? `<div class="iter-row"><strong>Connector / Method</strong>${it.connector}</div>` : ''}
         ${it.compliance ? `<div class="iter-row"><strong>AU Context</strong>${it.compliance}</div>` : ''}
+        ${it.connector ? `<div class="iter-row"><strong>Connectors &amp; Features</strong>${it.connector}</div>` : ''}
         ${it.buildNotes ? `<div class="iter-row"><strong>Build Notes</strong>${it.buildNotes}</div>` : ''}
         ${it.upsell ? `<div class="iter-upsell">➔ ${it.upsell}</div>` : ''}
       </div>
@@ -924,7 +924,7 @@ function openPanel(a) {
     </div>` : ''}
     ${a['Description'] ? `<div class="iter-row"><strong>What it does</strong>${a['Description']}</div>` : ''}
     ${a['AU-Specific Context'] ? `<div class="iter-row"><strong>AU Context</strong>${a['AU-Specific Context']}</div>` : ''}
-    ${a['Copilot Studio Build Notes'] ? `<div class="iter-row"><strong>How it's built</strong>${a['Copilot Studio Build Notes']}</div>` : ''}
+    ${a['Copilot Studio Build Notes'] ? `<div class="iter-row"><strong>Build Notes</strong>${a['Copilot Studio Build Notes']}</div>` : ''}
     <div class="info-box">
       <div class="info-box-row">
         <span class="info-box-icon">🔌</span>
