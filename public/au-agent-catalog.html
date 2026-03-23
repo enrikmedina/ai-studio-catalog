@@ -570,6 +570,14 @@
   .iter-row strong { font-weight: 700; color: var(--ink); display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; margin-top: 4px; border-bottom: 1.5px solid var(--border); padding-bottom: 3px; }
   .iter-why { font-size: 12.5px; line-height: 1.6; color: var(--ink); font-style: italic; border-left: 2px solid var(--teal); padding-left: 10px; }
   .iter-upsell { background: linear-gradient(135deg, rgba(52,223,186,.08), rgba(52,223,186,.03)); border: 1px solid var(--teal-pale); border-radius: 6px; padding: 10px 12px; font-size: 12px; color: var(--ink); }
+  .iter-claim-btn {
+    align-self: flex-start; background: var(--teal); color: var(--dark);
+    border: none; border-radius: 6px; padding: 7px 16px;
+    font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity .15s;
+  }
+  .iter-claim-btn:hover { opacity: .85; }
+  .iter-claim-btn:disabled { opacity: .5; cursor: default; }
+  .iter-claim-btn.claimed { background: rgba(52,223,186,.15); color: #0a8a66; border: 1px solid var(--teal-pale); cursor: default; }
 
   .panel-actions {
     display: flex; gap: 10px;
@@ -925,6 +933,7 @@ function renderIterations(raw) {
         ${it.connector ? `<div class="iter-row"><strong>Connectors &amp; Features</strong>${it.connector}</div>` : ''}
         ${it.buildNotes ? `<div class="iter-row"><strong>Build Notes</strong>${it.buildNotes}</div>` : ''}
         ${it.upsell ? `<div class="iter-upsell">➔ ${it.upsell}</div>` : ''}
+        <button class="iter-claim-btn" onclick="claimVariation(this,'${it.name.replace(/'/g,"\\'")}')">Claim this variation</button>
       </div>
     </div>`;
   }).join('');
@@ -1039,6 +1048,24 @@ async function claimAgent() {
     btn.disabled = false;
     btn.textContent = 'Claim this agent';
     alert('Could not claim agent — please try again.');
+  }
+}
+
+async function claimVariation(btn, variationName) {
+  const claimer = document.getElementById('userName')?.textContent || 'a team member';
+  btn.disabled = true;
+  btn.textContent = 'Claiming…';
+
+  try {
+    // Wire up same backend option as claimAgent() — Option A/B/C
+    await new Promise(r => setTimeout(r, 600)); // placeholder
+
+    btn.className = 'iter-claim-btn claimed';
+    btn.textContent = `✓ Claimed by ${claimer}`;
+  } catch {
+    btn.disabled = false;
+    btn.textContent = 'Claim this variation';
+    alert('Could not claim variation — please try again.');
   }
 }
 
