@@ -10,6 +10,7 @@ interface ClaimRequest {
   industry?: string;
   tier?: string;
   variationName?: string;
+  claimantEmail?: string;
 }
 
 interface SWAPrincipal {
@@ -20,12 +21,12 @@ interface SWAPrincipal {
 function getClaimant(req: HttpRequest): string {
   try {
     const header = req.headers["x-ms-client-principal"];
-    if (!header) return "unknown";
+    if (!header) return "";
     const decoded = Buffer.from(header, "base64").toString("utf-8");
     const principal: SWAPrincipal = JSON.parse(decoded);
-    return principal.userDetails || "unknown";
+    return principal.userDetails || "";
   } catch {
-    return "unknown";
+    return "";
   }
 }
 
@@ -59,7 +60,7 @@ const httpTrigger: AzureFunction = async function (
     return;
   }
 
-  const claimant   = getClaimant(req);
+  const claimant   = getClaimant(req) || body.claimantEmail || "unknown";
   const title      = body.variationName
     ? `[Claim] ${body.agentName} – ${body.variationName}`
     : `[Claim] ${body.agentName}`;

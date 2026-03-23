@@ -744,6 +744,8 @@ async function loadUser() {
     const { clientPrincipal } = await res.json();
     if (!clientPrincipal) return;
 
+    currentUserEmail = clientPrincipal.userDetails || '';
+
     // Prefer display name from claims, fall back to userDetails (email)
     const nameClaim = (clientPrincipal.claims || []).find(c => c.typ === 'name');
     const raw = nameClaim?.val || clientPrincipal.userDetails || '';
@@ -759,7 +761,10 @@ async function loadUser() {
 loadUser();
 
 // ── CONFIG ──────────────────────────────────────────────────────────────────
-const API_URL = 'https://agentcatalog-h0bpacatgndybfdz.australiaeast-01.azurewebsites.net/api/agents';
+const FUNC_BASE = 'https://agentcatalog-h0bpacatgndybfdz.australiaeast-01.azurewebsites.net/api';
+const API_URL   = FUNC_BASE + '/agents';
+
+let currentUserEmail = '';
 
 // ── TIER MAPS ────────────────────────────────────────────────────────────────
 const TIER_CLASS = { 'Prompt Agent': 't1', 'Connected Agent': 't3', 'Orchestration Agent': 't5' };
@@ -1009,10 +1014,10 @@ function openPanel(a) {
 
 // ── CLAIM ──────────────────────────────────────────────────────────────────────
 async function postClaim(payload) {
-  const res = await fetch('/api/claim', {
+  const res = await fetch(FUNC_BASE + '/claim', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, claimantEmail: currentUserEmail }),
   });
   if (!res.ok) {
     let detail = '';
