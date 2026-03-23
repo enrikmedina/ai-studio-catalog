@@ -560,6 +560,18 @@
     display: flex; gap: 10px;
     padding: 0 28px 28px;
   }
+  .btn-claim {
+    flex: 1; background: var(--teal); color: var(--dark);
+    border: none; border-radius: 8px;
+    padding: 11px 20px; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: opacity .15s;
+  }
+  .btn-claim:hover { opacity: .85; }
+  .btn-claim:disabled { opacity: .5; cursor: default; }
+  .btn-claim.claimed {
+    background: rgba(52,223,186,.15); color: #0a8a66;
+    border: 1.5px solid var(--teal-pale); cursor: default;
+  }
   .btn-primary {
     flex: 1; background: var(--dark); color: white;
     border: none; border-radius: 8px;
@@ -690,6 +702,7 @@
   <div class="panel-body" id="panelBody"></div>
   <div class="panel-actions">
     <button class="btn-secondary" onclick="closePanel()">Back to Catalog</button>
+    <button class="btn-claim" id="claimBtn" style="display:none" onclick="claimAgent()">Claim this agent</button>
   </div>
 </div>
 
@@ -936,9 +949,64 @@ function openPanel(a) {
     </div>
     ${renderIterations(a['Iterations'])}`;
 
+  // Claim button — only show for backlog agents
+  const claimBtn = document.getElementById('claimBtn');
+  if (a['Status'] === 'backlog') {
+    claimBtn.style.display = '';
+    claimBtn.className = 'btn-claim';
+    claimBtn.textContent = 'Claim this agent';
+    claimBtn.disabled = false;
+    claimBtn.dataset.agentId   = a['id'] || '';
+    claimBtn.dataset.agentName = a['Agent Name'];
+  } else {
+    claimBtn.style.display = 'none';
+  }
+
   document.getElementById('overlay').classList.add('open');
   document.getElementById('panel').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+// ── CLAIM ──────────────────────────────────────────────────────────────────────
+async function claimAgent() {
+  const btn       = document.getElementById('claimBtn');
+  const agentId   = btn.dataset.agentId;
+  const agentName = btn.dataset.agentName;
+  const claimer   = document.getElementById('userName')?.textContent || 'a team member';
+
+  btn.disabled = true;
+  btn.textContent = 'Claiming…';
+
+  try {
+    /* ── Wire up one of these options: ────────────────────────────────────────
+       Option A — Azure Function PATCH (recommended):
+         await fetch(`${API_URL}/${agentId}/claim`, {
+           method: 'PATCH',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ claimedBy: claimer })
+         });
+
+       Option B — Power Automate HTTP trigger:
+         await fetch('YOUR_POWER_AUTOMATE_URL', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ agentId, agentName, claimedBy: claimer })
+         });
+
+       Option C — Teams deep link (no backend):
+         window.open(`https://teams.microsoft.com/l/chat/0/0?message=I'm claiming "${agentName}" from the AI Studio backlog.`);
+    ──────────────────────────────────────────────────────────────────────── */
+
+    // Placeholder — replace with chosen option above
+    await new Promise(r => setTimeout(r, 600));
+
+    btn.className = 'btn-claim claimed';
+    btn.textContent = `✓ Claimed by ${claimer}`;
+  } catch {
+    btn.disabled = false;
+    btn.textContent = 'Claim this agent';
+    alert('Could not claim agent — please try again.');
+  }
 }
 
 function closePanel() {
