@@ -478,6 +478,21 @@
   .upsell-box .section-label { color: var(--teal); }
   .upsell-box .section-text { color: var(--ink); font-size: 13px; }
 
+  .why-box {
+    border-left: 3px solid var(--teal);
+    background: linear-gradient(135deg, rgba(52,223,186,.07), rgba(52,223,186,.02));
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 16px;
+  }
+  .why-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--teal); margin-bottom: 7px;
+  }
+  .why-text {
+    font-size: 13.5px; line-height: 1.65; color: var(--ink);
+    font-style: italic;
+  }
+
   /* ── ITERATIONS ── */
   .iterations-section { display: flex; flex-direction: column; gap: 8px; }
   .iter-group-header {
@@ -708,6 +723,7 @@ async function loadAgents() {
       'Tier':                    a.tier,
       'Points':                  a.points,
       'Use Case Type':           a.useCaseType,
+      'Why It Matters':          a.whyItMatters,
       'Description':             a.description,
       'AU-Specific Context':     a.auContext,
       'Copilot Studio Build Notes': a.buildNotes,
@@ -861,6 +877,11 @@ function openPanel(a) {
     ${statusBadge(a['Status'])}`;
 
   document.getElementById('panelBody').innerHTML = `
+    ${a['Why It Matters'] ? `
+    <div class="why-box">
+      <div class="why-label">Why it matters</div>
+      <div class="why-text">${a['Why It Matters']}</div>
+    </div>` : ''}
     <div>
       <div class="section-label">What it does</div>
       <div class="section-text">${a['Description']}</div>

@@ -7,6 +7,7 @@ interface SharePointFields {
   Tier?: string;
   Points?: number;
   UseCaseType?: string;
+  WhyItMatters?: string;
   Description?: string;
   AUContext?: string;
   BuildNotes?: string;
@@ -29,6 +30,7 @@ interface Agent {
   tier: string;
   points: number;
   useCaseType: string;
+  whyItMatters: string;
   description: string;
   auContext: string;
   buildNotes: string;
@@ -78,6 +80,7 @@ function mapItem(item: SharePointItem): Agent {
     tier: f.Tier ?? "",
     points: f.Points ?? 0,
     useCaseType: f.UseCaseType ?? "",
+    whyItMatters: f.WhyItMatters ?? "",
     description: f.Description ?? "",
     auContext: f.AUContext ?? "",
     buildNotes: f.BuildNotes ?? "",
