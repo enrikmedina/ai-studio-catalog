@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signed out — AI Studio Agent Catalog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #1A1A2E;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card {
+    text-align: center;
+    padding: 48px 56px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 16px;
+    max-width: 400px;
+  }
+  .icon { font-size: 40px; margin-bottom: 20px; }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: 10px; }
+  p { font-size: 14px; color: rgba(255,255,255,.55); margin-bottom: 28px; line-height: 1.6; }
+  a {
+    display: inline-block;
+    background: #34DFBA;
+    color: #1A1A2E;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+  }
+  a:hover { opacity: .88; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">👋</div>
+    <h1>You've been signed out</h1>
+    <p>Your session has ended. Sign back in to access the AI Studio Agent Catalog.</p>
+    <a href="/.auth/login/aad?post_login_redirect_uri=/">Sign back in</a>
+  </div>
+</body>
+</html>
