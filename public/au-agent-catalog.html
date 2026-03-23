@@ -480,6 +480,14 @@
 
   /* ── ITERATIONS ── */
   .iterations-section { display: flex; flex-direction: column; gap: 8px; }
+  .iter-group-header {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--muted);
+    padding: 12px 4px 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2px;
+  }
+  .iter-group-header:first-child { padding-top: 4px; }
   .iteration-card {
     border: 1.5px solid var(--border);
     border-radius: var(--radius);
@@ -802,9 +810,15 @@ function renderIterations(raw) {
 
   const TIER_CLS = { 'Prompt Agent': 't1', 'Connected Agent': 't3', 'Orchestration Agent': 't5' };
 
+  let lastGroup = null;
   const cards = items.map((it, i) => {
     const tc = TIER_CLS[it.tier] || 't3';
+    const groupHeader = it.group && it.group !== lastGroup
+      ? `<div class="iter-group-header">${it.group}</div>`
+      : '';
+    lastGroup = it.group || lastGroup;
     return `
+    ${groupHeader}
     <div class="iteration-card" id="iter-${i}">
       <div class="iteration-header" onclick="toggleIteration('iter-${i}')">
         <span class="iteration-num">${it.num}</span>
