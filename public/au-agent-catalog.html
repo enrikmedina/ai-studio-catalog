@@ -327,6 +327,12 @@
 
   .card-arrow { font-size: 14px; color: var(--border); transition: color .15s; }
   .card:hover .card-arrow { color: var(--teal); }
+  .variations-badge {
+    font-size: 10px; font-weight: 600; color: var(--teal);
+    background: rgba(52,223,186,.12); border: 1px solid rgba(52,223,186,.3);
+    border-radius: 4px; padding: 2px 7px;
+    white-space: nowrap;
+  }
 
   /* ── STATUS BADGE ── */
   .status-badge {
@@ -852,6 +858,12 @@ function render() {
       const card = document.createElement('div');
       card.className = `card ${cc} ${sc}`;
       card.style.animationDelay = `${i * 0.04}s`;
+      let iterCount = 0;
+      try { iterCount = JSON.parse(a['Iterations'] || '[]').length; } catch {}
+      const varBadge = iterCount > 0
+        ? `<span class="variations-badge">${iterCount} variation${iterCount > 1 ? 's' : ''} unclaimed</span>`
+        : '';
+
       card.innerHTML = `
         <div class="card-header">
           <div class="card-title">${a['Agent Name']}</div>
@@ -860,6 +872,7 @@ function render() {
         <div class="card-desc">${a['Description']}</div>
         <div class="card-footer">
           <span class="use-case-tag">${a['Use Case Type']}</span>
+          ${varBadge}
           ${statusBadge(a['Status'], true)}
           <span class="card-arrow">→</span>
         </div>`;
