@@ -653,6 +653,7 @@
 <!-- HEADER -->
 <header>
   <div class="header-inner">
+    <div style="flex:1"></div>
     <div class="user-greeting" id="userGreeting" style="display:none">
       <div class="user-avatar" id="userAvatar"></div>
       <span class="user-name">Hi, <strong id="userName"></strong></span>
@@ -774,10 +775,9 @@ const STATUS_CONFIG = {
   backlog:   { label: 'Coming Soon',  cls: 'status-backlog'   },
 };
 
-function statusBadge(status, onCard = false) {
+function statusBadge(status) {
   const cfg = STATUS_CONFIG[status];
-  if (!cfg) return '';
-  if (onCard && status === 'backlog') return '';
+  if (!cfg || status === 'backlog') return '';
   return `<span class="status-badge ${cfg.cls}">${cfg.label}</span>`;
 }
 
@@ -881,7 +881,7 @@ function render() {
       let iterCount = 0;
       try { iterCount = JSON.parse(a['Iterations'] || '[]').length; } catch {}
       const varBadge = iterCount > 0
-        ? `<span class="variations-badge">${iterCount} variation${iterCount > 1 ? 's' : ''} unclaimed</span>`
+        ? `<span class="variations-badge">${iterCount} variation${iterCount > 1 ? 's' : ''}</span>`
         : '';
 
       card.innerHTML = `
@@ -893,7 +893,7 @@ function render() {
         <div class="card-footer">
           <span class="use-case-tag">${a['Use Case Type']}</span>
           ${varBadge}
-          ${statusBadge(a['Status'], true)}
+          ${statusBadge(a['Status'])}
           <span class="card-arrow">→</span>
         </div>`;
       card.onclick = () => openPanel(a);
