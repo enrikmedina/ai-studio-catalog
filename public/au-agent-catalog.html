@@ -328,7 +328,7 @@
   .card-arrow { font-size: 14px; color: var(--border); transition: color .15s; }
   .card:hover .card-arrow { color: var(--teal); }
   .variations-badge {
-    font-size: 10px; font-weight: 600; color: var(--teal);
+    font-size: 10px; font-weight: 600; color: var(--ink);
     background: rgba(52,223,186,.12); border: 1px solid rgba(52,223,186,.3);
     border-radius: 4px; padding: 2px 7px;
     white-space: nowrap;
@@ -513,6 +513,15 @@
   }
 
   /* ── ITERATIONS ── */
+  .iterations-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; user-select: none; padding: 6px 0;
+  }
+  .iterations-toggle:hover .section-label { color: var(--ink); }
+  .iterations-chevron { font-size: 11px; color: var(--muted); transition: transform .2s; }
+  .iterations-toggle.open .iterations-chevron { transform: rotate(90deg); }
+  .iterations-body { display: none; margin-top: 8px; }
+  .iterations-body.open { display: block; }
   .iterations-section { display: flex; flex-direction: column; gap: 8px; }
   .iter-group-header {
     font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -920,15 +929,26 @@ function renderIterations(raw) {
     </div>`;
   }).join('');
 
+  const uid = 'iters-' + Math.random().toString(36).slice(2);
   return `
     <div>
-      <div class="section-label">Agent Variations (${items.length})</div>
-      <div class="iterations-section">${cards}</div>
+      <div class="iterations-toggle" onclick="toggleIterationsSection(this,'${uid}')">
+        <div class="section-label">Agent Variations (${items.length})</div>
+        <span class="iterations-chevron">▶</span>
+      </div>
+      <div class="iterations-body" id="${uid}">
+        <div class="iterations-section">${cards}</div>
+      </div>
     </div>`;
 }
 
 function toggleIteration(id) {
   document.getElementById(id).classList.toggle('open');
+}
+
+function toggleIterationsSection(toggle, bodyId) {
+  toggle.classList.toggle('open');
+  document.getElementById(bodyId).classList.toggle('open');
 }
 
 // ── PANEL ─────────────────────────────────────────────────────────────────────
