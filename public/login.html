@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — AI Studio Agent Catalog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #1A1A2E;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card {
+    text-align: center;
+    padding: 48px 56px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 16px;
+    max-width: 400px;
+    width: 90%;
+  }
+  .logo { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #34DFBA; margin-bottom: 24px; }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: 10px; }
+  p { font-size: 14px; color: rgba(255,255,255,.5); margin-bottom: 32px; line-height: 1.6; }
+  .signin-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: white; color: #1A1A2E;
+    font-weight: 600; font-size: 14px;
+    padding: 11px 28px; border-radius: 8px;
+    text-decoration: none; transition: opacity .15s;
+  }
+  .signin-btn:hover { opacity: .88; }
+  .ms-logo { width: 18px; height: 18px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">mySMB · AI Studio</div>
+    <h1>Agent Catalog</h1>
+    <p>Sign in with your mySMB Microsoft account to continue.</p>
+    <a class="signin-btn" href="/.auth/login/aad?post_login_redirect_uri=/">
+      <svg class="ms-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21">
+        <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+        <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+        <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+        <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+      </svg>
+      Sign in with Microsoft
+    </a>
+  </div>
+</body>
+</html>
