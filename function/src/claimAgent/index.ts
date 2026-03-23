@@ -1,6 +1,6 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 
-const ADO_ORG     = "mySMBAIStudio";
+const ADO_ORG     = "mySMBAIStudio"; // deploy trigger
 const ADO_PROJECT = "AI%20Studio";
 const ADO_API     = `https://dev.azure.com/${ADO_ORG}/${ADO_PROJECT}/_apis/wit/workitems/$Task?api-version=7.1`;
 
