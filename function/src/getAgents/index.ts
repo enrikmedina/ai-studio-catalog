@@ -14,6 +14,7 @@ interface SharePointFields {
   UpsellPath?: string;
   Status?: string;
   Published?: boolean | string;
+  Iterations?: string;
 }
 
 interface SharePointItem {
@@ -34,6 +35,7 @@ interface Agent {
   connectors: string;
   upsellPath: string;
   status: string;
+  iterations: string;
 }
 
 // Cache token to avoid acquiring a new one on every request
@@ -82,6 +84,7 @@ function mapItem(item: SharePointItem): Agent {
     connectors: f.Connectors ?? "",
     upsellPath: f.UpsellPath ?? "",
     status: f.Status ?? "available",
+    iterations: f.Iterations ?? "",
   };
 }
 
