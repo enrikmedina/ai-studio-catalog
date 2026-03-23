@@ -111,15 +111,9 @@
     letter-spacing: -.01em;
   }
   .hero h1 em { color: var(--teal); font-style: italic; }
-  .hero p {
-    color: rgba(255,255,255,.65);
-    font-size: 16px;
-    max-width: 560px;
-    margin: 0 auto 36px;
-    line-height: 1.6;
-  }
   .hero-stats {
     display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+    margin-bottom: 40px;
   }
   .stat { text-align: center; }
   .stat-num {
@@ -133,7 +127,49 @@
     margin-top: 4px;
   }
 
-  /* ── FILTERS ── */
+  /* ── HERO SEARCH ── */
+  .hero-search-wrap {
+    max-width: 680px; margin: 0 auto;
+  }
+  .hero-search-box {
+    display: flex; align-items: stretch;
+    background: white; border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,.35);
+  }
+  .hero-search-select {
+    border: none; outline: none;
+    background: white;
+    border-right: 1.5px solid var(--border);
+    padding: 0 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    min-width: 150px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .hero-search-input {
+    flex: 1; border: none; outline: none;
+    padding: 18px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; color: var(--ink);
+  }
+  .hero-search-input::placeholder { color: #9CA3AF; }
+  .hero-search-btn {
+    background: var(--teal); border: none;
+    padding: 0 24px; cursor: pointer;
+    display: flex; align-items: center;
+    font-size: 20px; color: var(--dark);
+    transition: opacity .15s;
+  }
+  .hero-search-btn:hover { opacity: .85; }
+
+  /* ── FILTERS BAR ── */
   .filters-bar {
     background: white;
     border-bottom: 1px solid var(--border);
@@ -145,31 +181,28 @@
   }
   .filters-inner {
     max-width: 1400px; margin: 0 auto;
-    display: flex; align-items: center; gap: 8px;
-    padding: 12px 0; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0;
   }
-  .filter-label { font-size: 12px; color: var(--muted); font-weight: 500; margin-right: 4px; white-space: nowrap; }
-
-  .pill {
-    padding: 6px 14px;
-    border-radius: 20px;
+  .filter-label { font-size: 12px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .filter-select {
     border: 1.5px solid var(--border);
-    background: white;
+    border-radius: 8px;
+    padding: 7px 32px 7px 12px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 12px; font-weight: 500;
-    cursor: pointer;
-    transition: all .15s;
-    white-space: nowrap;
+    font-size: 13px; font-weight: 500;
     color: var(--ink);
+    background: white;
+    cursor: pointer; outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: border-color .15s;
   }
-  .pill:hover { border-color: var(--teal); color: var(--teal); }
-  .pill.active { background: var(--dark); border-color: var(--dark); color: white; }
-  .pill.tier-1.active  { background: var(--t1); border-color: var(--t1); color: white; }
-  .pill.tier-3.active  { background: var(--t3); border-color: var(--t3); color: white; }
-  .pill.tier-5.active  { background: var(--t5); border-color: var(--t5); color: white; }
-
-  .filter-divider { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
-
+  .filter-select:hover { border-color: var(--teal); }
+  .filter-select:focus { border-color: var(--teal); }
+  .filter-divider { width: 1px; height: 20px; background: var(--border); }
   .result-count {
     margin-left: auto;
     font-size: 12px; color: var(--muted);
@@ -295,9 +328,32 @@
     background: currentColor;
     opacity: .8;
   }
-  .status-available  { color: #0a8a66; background: rgba(52,223,186,.12); }
-  .status-in_build   { color: #b45309; background: rgba(245,158,11,.12); }
+  .status-available  { color: #fff; background: #0a8a66; font-weight: 700; }
+  .status-in_build   { color: #b45309; background: rgba(245,158,11,.15); }
   .status-backlog    { color: #9CA3AF; background: rgba(156,163,175,.12); }
+
+  /* ── BACKLOG CARD STATE ── */
+  .card.is-backlog {
+    opacity: .6;
+    border-style: dashed;
+  }
+  .card.is-backlog::before { background: #D1D5DB; }
+  .card.is-backlog:hover {
+    opacity: .85;
+    border-color: #9CA3AF;
+    border-style: dashed;
+    box-shadow: var(--shadow);
+    transform: none;
+  }
+  .card.is-backlog .card-arrow { color: #D1D5DB; }
+  .card.is-backlog:hover .card-arrow { color: #9CA3AF; }
+
+  /* ── IN-BUILD CARD STATE ── */
+  .card.is-in_build {
+    border-color: rgba(245,158,11,.35);
+    background: rgba(255,251,245,1);
+  }
+  .card.is-in_build::before { background: #f59e0b; }
 
   /* ── LOADING STATE ── */
   .loading-state {
@@ -422,6 +478,47 @@
   .upsell-box .section-label { color: var(--teal); }
   .upsell-box .section-text { color: var(--ink); font-size: 13px; }
 
+  /* ── ITERATIONS ── */
+  .iterations-section { display: flex; flex-direction: column; gap: 8px; }
+  .iteration-card {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .iteration-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; cursor: pointer;
+    background: var(--cream);
+    transition: background .15s;
+    user-select: none;
+  }
+  .iteration-header:hover { background: #e8e6e0; }
+  .iteration-num {
+    font-size: 10px; font-weight: 700; color: white;
+    background: var(--dark); border-radius: 4px;
+    padding: 2px 7px; flex-shrink: 0;
+  }
+  .iteration-name { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; }
+  .iteration-tier {
+    font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+    text-transform: uppercase; flex-shrink: 0;
+  }
+  .iteration-tier.t1 { background: var(--t1-bg); color: var(--t1); }
+  .iteration-tier.t3 { background: var(--t3-bg); color: var(--t3); }
+  .iteration-tier.t5 { background: var(--t5-bg); color: var(--t5); }
+  .iteration-chevron { font-size: 11px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
+  .iteration-card.open .iteration-chevron { transform: rotate(90deg); }
+  .iteration-body {
+    display: none; padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .iteration-card:not(.open) .iteration-body { display: none; }
+  .iteration-card.open .iteration-body { display: flex; }
+  .iter-row { font-size: 12.5px; line-height: 1.55; color: var(--ink); }
+  .iter-row strong { font-weight: 600; color: var(--muted); display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 2px; }
+  .iter-upsell { background: linear-gradient(135deg, rgba(52,223,186,.08), rgba(52,223,186,.03)); border: 1px solid var(--teal-pale); border-radius: 6px; padding: 10px 12px; font-size: 12px; color: var(--ink); }
+
   .panel-actions {
     display: flex; gap: 10px;
     padding: 0 28px 28px;
@@ -468,6 +565,9 @@
     header, .filters-bar, .main { padding-left: 16px; padding-right: 16px; }
     .hero { padding: 40px 16px; }
     .hero-stats { gap: 24px; }
+    .hero-search-box { flex-direction: column; border-radius: 10px; }
+    .hero-search-select { border-right: none; border-bottom: 1.5px solid var(--border); min-width: unset; padding: 14px 16px; }
+    .hero-search-btn { padding: 14px; justify-content: center; }
     .cards-grid { grid-template-columns: 1fr; }
     .panel-actions { flex-direction: column; }
   }
@@ -478,54 +578,57 @@
 <!-- HEADER -->
 <header>
   <div class="header-inner">
-    <div class="logo-block">
-      <div class="logo-m">m</div>
-      <div>
-        <div class="logo-text">mySMB</div>
-        <div class="logo-sub">AI Studio</div>
-      </div>
-    </div>
-    <div class="header-search">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="Search agents, industries, or use cases…" autocomplete="off">
-    </div>
-    <button class="header-cta" onclick="openRequest()">+ Request an Agent</button>
   </div>
 </header>
 
 <!-- HERO -->
 <section class="hero">
   <h1>What can AI do<br>for <em>your</em> business?</h1>
-  <p>Browse production-ready AI agents built for Australian businesses — filter by industry, complexity tier, and use case.</p>
   <div class="hero-stats">
-    <div class="stat"><span class="stat-num" id="statAgents">—</span><div class="stat-label">Agents</div></div>
-    <div class="stat"><span class="stat-num">10</span><div class="stat-label">Industries</div></div>
-    <div class="stat"><span class="stat-num">3</span><div class="stat-label">Complexity Tiers</div></div>
+    <div class="stat"><span class="stat-num" id="statLive">—</span><div class="stat-label">Live</div></div>
+    <div class="stat"><span class="stat-num" id="statInBuild">—</span><div class="stat-label">In Build</div></div>
+    <div class="stat"><span class="stat-num" id="statBacklog">—</span><div class="stat-label">Coming Soon</div></div>
     <div class="stat"><span class="stat-num">AU</span><div class="stat-label">Compliant</div></div>
+  </div>
+  <div class="hero-search-wrap">
+    <div class="hero-search-box">
+      <select class="hero-search-select" id="industrySelect">
+        <option value="all">All Industries</option>
+        <option value="Property & Real Estate">Property & Real Estate</option>
+        <option value="Healthcare & Aged Care">Healthcare & Aged Care</option>
+        <option value="Financial Services">Financial Services</option>
+        <option value="Legal & Professional Services">Legal & Professional Services</option>
+        <option value="Education">Education</option>
+        <option value="Retail & eCommerce">Retail & eCommerce</option>
+        <option value="Government & Local Council">Government & Local Council</option>
+        <option value="Construction & Trades">Construction & Trades</option>
+        <option value="Agriculture & Agribusiness">Agriculture & Agribusiness</option>
+        <option value="HR & Workforce">HR & Workforce</option>
+      </select>
+      <input class="hero-search-input" type="text" id="searchInput" placeholder="Search agents, use cases, connectors…" autocomplete="off">
+      <button class="hero-search-btn">🔍</button>
+    </div>
   </div>
 </section>
 
 <!-- FILTERS -->
 <div class="filters-bar">
   <div class="filters-inner">
-    <span class="filter-label">Industry</span>
-    <button class="pill active" data-filter="industry" data-value="all">All</button>
-    <button class="pill" data-filter="industry" data-value="Property & Real Estate">Property</button>
-    <button class="pill" data-filter="industry" data-value="Healthcare & Aged Care">Healthcare</button>
-    <button class="pill" data-filter="industry" data-value="Financial Services">Financial</button>
-    <button class="pill" data-filter="industry" data-value="Legal & Professional Services">Legal</button>
-    <button class="pill" data-filter="industry" data-value="Education">Education</button>
-    <button class="pill" data-filter="industry" data-value="Retail & eCommerce">Retail</button>
-    <button class="pill" data-filter="industry" data-value="Government & Local Council">Government</button>
-    <button class="pill" data-filter="industry" data-value="Construction & Trades">Construction</button>
-    <button class="pill" data-filter="industry" data-value="Agriculture & Agribusiness">Agriculture</button>
-    <button class="pill" data-filter="industry" data-value="HR & Workforce">HR</button>
-    <div class="filter-divider"></div>
     <span class="filter-label">Tier</span>
-    <button class="pill tier-1 active" data-filter="tier" data-value="all">All</button>
-    <button class="pill tier-1" data-filter="tier" data-value="Prompt Agent">Prompt</button>
-    <button class="pill tier-3" data-filter="tier" data-value="Connected Agent">Connected</button>
-    <button class="pill tier-5" data-filter="tier" data-value="Orchestration Agent">Orchestration</button>
+    <select class="filter-select" id="tierSelect">
+      <option value="all">All Tiers</option>
+      <option value="Prompt Agent">Prompt Agent</option>
+      <option value="Connected Agent">Connected Agent</option>
+      <option value="Orchestration Agent">Orchestration Agent</option>
+    </select>
+    <div class="filter-divider"></div>
+    <span class="filter-label">Status</span>
+    <select class="filter-select" id="statusSelect">
+      <option value="all">All Status</option>
+      <option value="available">Live</option>
+      <option value="in_build">In Build</option>
+      <option value="backlog">Coming Soon</option>
+    </select>
     <span class="result-count" id="resultCount"></span>
   </div>
 </div>
@@ -544,7 +647,6 @@
   </div>
   <div class="panel-body" id="panelBody"></div>
   <div class="panel-actions">
-    <button class="btn-primary" onclick="openRequest()">Request this Agent</button>
     <button class="btn-secondary" onclick="closePanel()">Back to Catalog</button>
   </div>
 </div>
@@ -569,15 +671,16 @@ const STATUS_CONFIG = {
   backlog:   { label: 'Coming Soon',  cls: 'status-backlog'   },
 };
 
-function statusBadge(status) {
+function statusBadge(status, onCard = false) {
   const cfg = STATUS_CONFIG[status];
   if (!cfg) return '';
+  if (onCard && status === 'backlog') return '';
   return `<span class="status-badge ${cfg.cls}">${cfg.label}</span>`;
 }
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let AGENTS = [];
-let activeIndustry = 'all', activeTier = 'all', searchQ = '';
+let activeIndustry = 'all', activeTier = 'all', activeStatus = 'all', searchQ = '';
 
 // ── DATA LOADING ─────────────────────────────────────────────────────────────
 async function loadAgents() {
@@ -603,9 +706,12 @@ async function loadAgents() {
       'Connectors / Features':   a.connectors,
       'Upsell Path':             a.upsellPath,
       'Status':                  a.status,
+      'Iterations':              a.iterations,
     }));
 
-    document.getElementById('statAgents').textContent = AGENTS.length;
+    document.getElementById('statLive').textContent    = AGENTS.filter(a => a['Status'] === 'available').length;
+    document.getElementById('statInBuild').textContent = AGENTS.filter(a => a['Status'] === 'in_build').length;
+    document.getElementById('statBacklog').textContent = AGENTS.filter(a => a['Status'] === 'backlog').length;
     render();
   } catch (err) {
     console.error('Failed to load agents:', err);
@@ -622,11 +728,12 @@ async function loadAgents() {
 // ── FILTER ───────────────────────────────────────────────────────────────────
 function getFiltered() {
   return AGENTS.filter(a => {
-    const matchInd  = activeIndustry === 'all' || a['Industry'] === activeIndustry;
-    const matchTier = activeTier === 'all' || a['Tier'] === activeTier;
+    const matchInd    = activeIndustry === 'all' || a['Industry'] === activeIndustry;
+    const matchTier   = activeTier === 'all' || a['Tier'] === activeTier;
+    const matchStatus = activeStatus === 'all' || a['Status'] === activeStatus;
     const q = searchQ.toLowerCase();
     const matchQ = !q || [a['Agent Name'], a['Industry'], a['Description'], a['Use Case Type'], a['Connectors / Features']].some(f => f && f.toLowerCase().includes(q));
-    return matchInd && matchTier && matchQ;
+    return matchInd && matchTier && matchStatus && matchQ;
   });
 }
 
@@ -660,8 +767,9 @@ function render() {
     agents.forEach((a, i) => {
       const tc = TIER_CLASS[a['Tier']] || 't3';
       const cc = CARD_TIER[a['Tier']] || 'tier-3';
+      const sc = a['Status'] === 'backlog' ? 'is-backlog' : a['Status'] === 'in_build' ? 'is-in_build' : '';
       const card = document.createElement('div');
-      card.className = `card ${cc}`;
+      card.className = `card ${cc} ${sc}`;
       card.style.animationDelay = `${i * 0.04}s`;
       card.innerHTML = `
         <div class="card-header">
@@ -671,7 +779,7 @@ function render() {
         <div class="card-desc">${a['Description']}</div>
         <div class="card-footer">
           <span class="use-case-tag">${a['Use Case Type']}</span>
-          ${statusBadge(a['Status'])}
+          ${statusBadge(a['Status'], true)}
           <span class="card-arrow">→</span>
         </div>`;
       card.onclick = () => openPanel(a);
@@ -679,6 +787,48 @@ function render() {
     });
     catalog.appendChild(grid);
   });
+}
+
+// ── ITERATIONS ────────────────────────────────────────────────────────────────
+function renderIterations(raw) {
+  if (!raw) return '';
+  let items;
+  try { items = JSON.parse(raw); } catch { return ''; }
+  if (!items.length) return '';
+
+  const TIER_CLS = { 'Prompt Agent': 't1', 'Connected Agent': 't3', 'Orchestration Agent': 't5' };
+
+  const cards = items.map((it, i) => {
+    const tc = TIER_CLS[it.tier] || 't3';
+    return `
+    <div class="iteration-card" id="iter-${i}">
+      <div class="iteration-header" onclick="toggleIteration('iter-${i}')">
+        <span class="iteration-num">${it.num}</span>
+        <span class="iteration-name">${it.name}</span>
+        <span class="iteration-tier ${tc}">${it.tier || ''}</span>
+        <span class="iteration-chevron">▶</span>
+      </div>
+      <div class="iteration-body">
+        ${it.targetClient ? `<div class="iter-row"><strong>Target Client</strong>${it.targetClient}</div>` : ''}
+        ${it.description ? `<div class="iter-row"><strong>What it does</strong>${it.description}</div>` : ''}
+        ${it.dataSource ? `<div class="iter-row"><strong>Data Source</strong>${it.dataSource}</div>` : ''}
+        ${it.connector ? `<div class="iter-row"><strong>Connector / Method</strong>${it.connector}</div>` : ''}
+        ${it.compliance ? `<div class="iter-row"><strong>AU Compliance</strong>${it.compliance}</div>` : ''}
+        ${it.buildNotes ? `<div class="iter-row"><strong>Build Notes</strong>${it.buildNotes}</div>` : ''}
+        ${it.upsell ? `<div class="iter-upsell">➔ ${it.upsell}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div>
+      <div class="section-label">Agent Variations (${items.length})</div>
+      <div class="iterations-section">${cards}</div>
+    </div>`;
+}
+
+function toggleIteration(id) {
+  document.getElementById(id).classList.toggle('open');
 }
 
 // ── PANEL ─────────────────────────────────────────────────────────────────────
@@ -716,7 +866,8 @@ function openPanel(a) {
     <div class="upsell-box">
       <div class="section-label">Upsell path</div>
       <div class="section-text">${a['Upsell Path']}</div>
-    </div>`;
+    </div>
+    ${renderIterations(a['Iterations'])}`;
 
   document.getElementById('overlay').classList.add('open');
   document.getElementById('panel').classList.add('open');
@@ -734,22 +885,18 @@ function openRequest() {
 }
 
 // ── EVENTS ────────────────────────────────────────────────────────────────────
-document.querySelectorAll('[data-filter]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const f = btn.dataset.filter, v = btn.dataset.value;
-    document.querySelectorAll(`[data-filter="${f}"]`).forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    if (f === 'industry') activeIndustry = v;
-    else activeTier = v;
-    render();
-  });
+document.getElementById('industrySelect').addEventListener('change', e => {
+  activeIndustry = e.target.value; render();
 });
-
+document.getElementById('tierSelect').addEventListener('change', e => {
+  activeTier = e.target.value; render();
+});
+document.getElementById('statusSelect').addEventListener('change', e => {
+  activeStatus = e.target.value; render();
+});
 document.getElementById('searchInput').addEventListener('input', e => {
-  searchQ = e.target.value;
-  render();
+  searchQ = e.target.value; render();
 });
-
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
