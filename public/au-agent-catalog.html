@@ -1008,62 +1008,56 @@ function openPanel(a) {
 }
 
 // ── CLAIM ──────────────────────────────────────────────────────────────────────
-async function claimAgent() {
-  const btn       = document.getElementById('claimBtn');
-  const agentId   = btn.dataset.agentId;
-  const agentName = btn.dataset.agentName;
-  const claimer   = document.getElementById('userName')?.textContent || 'a team member';
+async function postClaim(payload) {
+  const res = await fetch('/api/claim', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json(); // { id, url }
+}
 
+async function claimAgent() {
+  const btn  = document.getElementById('claimBtn');
+  const a    = AGENTS.find(x => x['id'] === btn.dataset.agentId) || {};
   btn.disabled = true;
   btn.textContent = 'Claiming…';
-
   try {
-    /* ── Wire up one of these options: ────────────────────────────────────────
-       Option A — Azure Function PATCH (recommended):
-         await fetch(`${API_URL}/${agentId}/claim`, {
-           method: 'PATCH',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ claimedBy: claimer })
-         });
-
-       Option B — Power Automate HTTP trigger:
-         await fetch('YOUR_POWER_AUTOMATE_URL', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ agentId, agentName, claimedBy: claimer })
-         });
-
-       Option C — Teams deep link (no backend):
-         window.open(`https://teams.microsoft.com/l/chat/0/0?message=I'm claiming "${agentName}" from the AI Studio backlog.`);
-    ──────────────────────────────────────────────────────────────────────── */
-
-    // Placeholder — replace with chosen option above
-    await new Promise(r => setTimeout(r, 600));
-
+    const { id, url } = await postClaim({
+      agentName:   btn.dataset.agentName,
+      description: a['Description'] || '',
+      industry:    a['Industry']    || '',
+      tier:        a['Tier']        || '',
+    });
     btn.className = 'btn-claim claimed';
-    btn.textContent = `✓ Claimed by ${claimer}`;
+    btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
   } catch {
     btn.disabled = false;
     btn.textContent = 'Claim this agent';
-    alert('Could not claim agent — please try again.');
+    alert('Could not create ADO work item — please try again.');
   }
 }
 
 async function claimVariation(btn, variationName) {
-  const claimer = document.getElementById('userName')?.textContent || 'a team member';
+  const agentBtn = document.getElementById('claimBtn');
+  const a        = AGENTS.find(x => x['id'] === agentBtn?.dataset.agentId) || {};
   btn.disabled = true;
   btn.textContent = 'Claiming…';
-
   try {
-    // Wire up same backend option as claimAgent() — Option A/B/C
-    await new Promise(r => setTimeout(r, 600)); // placeholder
-
+    const { id, url } = await postClaim({
+      agentName:     agentBtn?.dataset.agentName || '',
+      variationName: variationName,
+      description:   a['Description'] || '',
+      industry:      a['Industry']    || '',
+      tier:          a['Tier']        || '',
+    });
     btn.className = 'iter-claim-btn claimed';
-    btn.textContent = `✓ Claimed by ${claimer}`;
+    btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
   } catch {
     btn.disabled = false;
     btn.textContent = 'Claim this variation';
-    alert('Could not claim variation — please try again.');
+    alert('Could not create ADO work item — please try again.');
   }
 }
 
