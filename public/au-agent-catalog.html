@@ -327,12 +327,17 @@
 
   .card-arrow { font-size: 14px; color: var(--border); transition: color .15s; }
   .card:hover .card-arrow { color: var(--teal); }
-  .variations-badge {
-    font-size: 10px; font-weight: 600; color: var(--ink);
-    background: rgba(52,223,186,.12); border: 1px solid rgba(52,223,186,.3);
-    border-radius: 4px; padding: 2px 7px;
-    white-space: nowrap;
+  .variations-strip {
+    display: flex; align-items: center; gap: 8px;
+    border-top: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    padding: 8px 14px;
+    margin: 0 -20px -20px;
+    background: rgba(52,223,186,.05);
+    font-size: 11px; font-weight: 600; color: var(--ink);
+    text-transform: uppercase; letter-spacing: .06em;
   }
+  .variations-strip-icon { font-size: 13px; }
 
   /* ── STATUS BADGE ── */
   .status-badge {
@@ -880,8 +885,8 @@ function render() {
       card.style.animationDelay = `${i * 0.04}s`;
       let iterCount = 0;
       try { iterCount = JSON.parse(a['Iterations'] || '[]').length; } catch {}
-      const varBadge = iterCount > 0
-        ? `<span class="variations-badge">${iterCount} variation${iterCount > 1 ? 's' : ''}</span>`
+      const varStrip = iterCount > 0
+        ? `<div class="variations-strip"><span class="variations-strip-icon">▣</span>${iterCount} variation${iterCount > 1 ? 's' : ''} available</div>`
         : '';
 
       card.innerHTML = `
@@ -892,10 +897,10 @@ function render() {
         <div class="card-desc">${a['Description']}</div>
         <div class="card-footer">
           <span class="use-case-tag">${a['Use Case Type']}</span>
-          ${varBadge}
           ${statusBadge(a['Status'])}
           <span class="card-arrow">→</span>
-        </div>`;
+        </div>
+        ${varStrip}`;
       card.onclick = () => openPanel(a);
       grid.appendChild(card);
     });
