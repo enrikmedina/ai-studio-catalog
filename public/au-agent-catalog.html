@@ -140,8 +140,15 @@
   }
   .filters-inner {
     max-width: 1400px; margin: 0 auto;
-    display: flex; align-items: center; gap: 8px;
-    padding: 9px 0;
+    display: flex; flex-direction: column; gap: 0;
+    padding: 10px 0 8px;
+  }
+  .filters-row1 {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .filters-row2 {
+    display: flex; align-items: center; gap: 6px;
   }
   .filter-type-label {
     font-size: 11px;
@@ -175,12 +182,33 @@
     color: var(--dark);
     font-weight: 700;
   }
-  .result-count {
+  .filters-search {
     margin-left: auto;
-    font-size: 12px; color: rgba(255,255,255,.4);
-    white-space: nowrap;
+    position: relative;
+    display: flex; align-items: center;
   }
-  .result-count strong { color: rgba(255,255,255,.75); }
+  .filters-search input {
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 6px;
+    padding: 5px 36px 5px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: white;
+    outline: none;
+    width: 200px;
+  }
+  .filters-search input::placeholder { color: rgba(255,255,255,.4); }
+  .filters-search-icon {
+    position: absolute; right: 10px;
+    font-size: 13px; color: rgba(255,255,255,.35);
+    pointer-events: none;
+  }
+  .filters-search-kbd {
+    position: absolute; right: 28px;
+    font-size: 10px; color: rgba(255,255,255,.25);
+    pointer-events: none; white-space: nowrap;
+  }
 
   /* ── MAIN LAYOUT ── */
   .main {
@@ -638,50 +666,58 @@
 <!-- FILTER BAR -->
 <div class="filters-bar">
   <div class="filters-inner">
-    <div class="view-toggle">
-      <button class="view-btn active" id="viewGrid" title="Grid view">&#x229E;</button>
-      <button class="view-btn" id="viewList" title="List view">&#x2630;</button>
-    </div>
-    <div class="header-stats" style="margin-right:8px">
-      <div class="header-stat">
-        <span class="header-stat-num" id="statBacklog">—</span>
-        <span class="header-stat-label" style="color:rgba(255,255,255,.45)">Agents</span>
+    <!-- Row 1: view toggle + stats + search -->
+    <div class="filters-row1">
+      <div class="view-toggle">
+        <button class="view-btn active" id="viewGrid" title="Grid view">&#x229E;</button>
+        <button class="view-btn" id="viewList" title="List view">&#x2630;</button>
       </div>
-      <div class="header-stat-sep"></div>
-      <div class="header-stat">
-        <span class="header-stat-num" id="statVariations">—</span>
-        <span class="header-stat-label" style="color:rgba(255,255,255,.45)">Variations</span>
+      <div style="width:1px;height:16px;background:rgba(255,255,255,.12);margin:0 2px"></div>
+      <div class="header-stats">
+        <div class="header-stat">
+          <span class="header-stat-num" id="statBacklog">—</span>
+          <span class="header-stat-label" style="color:rgba(255,255,255,.45)">Agents</span>
+        </div>
+        <div class="header-stat-sep"></div>
+        <div class="header-stat">
+          <span class="header-stat-num" id="statVariations">—</span>
+          <span class="header-stat-label" style="color:rgba(255,255,255,.45)">Variations</span>
+        </div>
+      </div>
+      <div class="filters-search">
+        <input type="text" id="searchInput" placeholder="Search agents…" autocomplete="off">
+        <span class="filters-search-icon">🔍</span>
       </div>
     </div>
-    <div style="width:1px;height:16px;background:rgba(255,255,255,.12);margin:0 4px"></div>
-    <span class="filter-type-label">Type:</span>
-    <button class="type-pill active" data-type="all">All</button>
-    <button class="type-pill" data-type="Automation">Automation</button>
-    <button class="type-pill" data-type="AI Workflow">AI Workflow</button>
-    <button class="type-pill" data-type="Copilot-Assisted">Copilot-Assisted</button>
-    <button class="type-pill" data-type="Agent">Agent</button>
-    <div style="width:1px;height:16px;background:rgba(255,255,255,.12);margin:0 4px"></div>
-    <select class="header-select" id="tierSelect" style="background:rgba(255,255,255,.1);color:white;border-color:rgba(255,255,255,.2);font-size:12px;padding:4px 24px 4px 8px">
-      <option value="all">All tiers</option>
-      <option value="Prompt Agent">Prompt Agent</option>
-      <option value="Connected Agent">Connected Agent</option>
-      <option value="Orchestration Agent">Orchestration Agent</option>
-    </select>
-    <select class="header-select" id="industrySelect" style="background:rgba(255,255,255,.1);color:white;border-color:rgba(255,255,255,.2);font-size:12px;padding:4px 24px 4px 8px">
-      <option value="all">All Industries</option>
-      <option value="Property & Real Estate">Property &amp; Real Estate</option>
-      <option value="Healthcare & Aged Care">Healthcare &amp; Aged Care</option>
-      <option value="Financial Services">Financial Services</option>
-      <option value="Legal & Professional Services">Legal &amp; Professional Services</option>
-      <option value="Education">Education</option>
-      <option value="Retail & eCommerce">Retail &amp; eCommerce</option>
-      <option value="Government & Local Council">Government &amp; Local Council</option>
-      <option value="Construction & Trades">Construction &amp; Trades</option>
-      <option value="Agriculture & Agribusiness">Agriculture &amp; Agribusiness</option>
-      <option value="HR & Workforce">HR &amp; Workforce</option>
-    </select>
-    <input class="header-search-input" type="text" id="searchInput" placeholder="Search agents…" autocomplete="off" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:12px;color:white;outline:none;width:180px">
-    <span class="result-count" id="resultCount"></span>
+    <!-- Row 2: type pills + tier/industry -->
+    <div class="filters-row2">
+      <span class="filter-type-label">Type:</span>
+      <button class="type-pill active" data-type="all">All</button>
+      <button class="type-pill" data-type="Automation">Automation</button>
+      <button class="type-pill" data-type="AI Workflow">AI Workflow</button>
+      <button class="type-pill" data-type="Copilot-Assisted">Copilot-Assisted</button>
+      <button class="type-pill" data-type="Agent">Agent</button>
+      <div style="flex:1"></div>
+      <select class="header-select" id="tierSelect" style="background:rgba(255,255,255,.1);color:white;border-color:rgba(255,255,255,.2);font-size:12px;padding:4px 24px 4px 8px">
+        <option value="all">All tiers</option>
+        <option value="Prompt Agent">Prompt Agent</option>
+        <option value="Connected Agent">Connected Agent</option>
+        <option value="Orchestration Agent">Orchestration Agent</option>
+      </select>
+      <select class="header-select" id="industrySelect" style="background:rgba(255,255,255,.1);color:white;border-color:rgba(255,255,255,.2);font-size:12px;padding:4px 24px 4px 8px">
+        <option value="all">All Industries</option>
+        <option value="Property & Real Estate">Property &amp; Real Estate</option>
+        <option value="Healthcare & Aged Care">Healthcare &amp; Aged Care</option>
+        <option value="Financial Services">Financial Services</option>
+        <option value="Legal & Professional Services">Legal &amp; Professional Services</option>
+        <option value="Education">Education</option>
+        <option value="Retail & eCommerce">Retail &amp; eCommerce</option>
+        <option value="Government & Local Council">Government &amp; Local Council</option>
+        <option value="Construction & Trades">Construction &amp; Trades</option>
+        <option value="Agriculture & Agribusiness">Agriculture &amp; Agribusiness</option>
+        <option value="HR & Workforce">HR &amp; Workforce</option>
+      </select>
+    </div>
   </div>
 </div>
 
@@ -760,7 +796,6 @@ let activeIndustry = 'all', activeTier = 'all', activeStatus = 'all', searchQ = 
 async function loadAgents() {
   const catalog = document.getElementById('catalog');
   catalog.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Loading agents…</p></div>';
-  document.getElementById('resultCount').innerHTML = '';
 
   try {
     const res = await fetch(API_URL);
@@ -798,7 +833,6 @@ async function loadAgents() {
         <p>Could not load the agent catalog. Please check your connection and try again.</p>
         <button class="btn-retry" onclick="loadAgents()">Retry</button>
       </div>`;
-    document.getElementById('resultCount').innerHTML = '';
   }
 }
 
@@ -822,8 +856,7 @@ function render() {
   const iterTotal = filtered.reduce((sum, a) => {
     try { return sum + JSON.parse(a['Iterations'] || '[]').length; } catch { return sum; }
   }, 0);
-  const total = filtered.length + iterTotal;
-  document.getElementById('resultCount').innerHTML = `<strong>${total}</strong> agents`;
+  const total = filtered.length + iterTotal; // eslint-disable-line no-unused-vars
 
   if (!filtered.length) {
     catalog.innerHTML = '<div class="empty-state"><div class="em">&#x1F50D;</div><p>No agents match your filters. Try broadening your search.</p></div>';
