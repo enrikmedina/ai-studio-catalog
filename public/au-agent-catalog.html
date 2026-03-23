@@ -150,41 +150,6 @@
     display: flex; justify-content: center;
     margin-bottom: 10px;
   }
-  .filters-row3 {
-    display: flex; align-items: center; gap: 6px;
-  }
-  .filter-type-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,.4);
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    white-space: nowrap;
-    margin-right: 2px;
-  }
-  .type-pill {
-    background: none;
-    border: 1.5px solid rgba(255,255,255,.2);
-    border-radius: 20px;
-    padding: 4px 13px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(255,255,255,.6);
-    cursor: pointer;
-    transition: all .15s;
-    white-space: nowrap;
-  }
-  .type-pill:hover {
-    border-color: var(--teal);
-    color: var(--teal);
-  }
-  .type-pill.active {
-    background: var(--teal);
-    border-color: var(--teal);
-    color: var(--dark);
-    font-weight: 700;
-  }
   /* ── COMPOUND SEARCH BAR ── */
   .csearch {
     display: flex;
@@ -337,14 +302,6 @@
   .card-footer {
     display: flex; align-items: center; justify-content: space-between;
     gap: 8px; margin-top: auto;
-  }
-  .use-case-tag {
-    font-size: 10px; font-weight: 600;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 2px 7px;
-    text-transform: uppercase; letter-spacing: .04em;
   }
 
   .card-arrow { font-size: 14px; color: var(--border); transition: color .15s; }
@@ -500,7 +457,7 @@
   .panel-badge.t1 { background: var(--t1-bg); color: var(--t1); }
   .panel-badge.t3 { background: var(--t3-bg); color: var(--t3); }
   .panel-badge.t5 { background: var(--t5-bg); color: var(--t5); }
-  .panel-badge.uc  { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); }
+
 
   .panel-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
 
@@ -752,15 +709,6 @@
         <button class="csearch-btn" tabindex="-1">🔍</button>
       </div>
     </div>
-    <!-- Row 3: type pills -->
-    <div class="filters-row3">
-      <span class="filter-type-label">Type:</span>
-      <button class="type-pill active" data-type="all">All</button>
-      <button class="type-pill" data-type="Automation">Automation</button>
-      <button class="type-pill" data-type="AI Workflow">AI Workflow</button>
-      <button class="type-pill" data-type="Copilot-Assisted">Copilot-Assisted</button>
-      <button class="type-pill" data-type="Agent">Agent</button>
-    </div>
   </div>
 </div>
 
@@ -833,7 +781,7 @@ function statusBadge(status) {
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let AGENTS = [];
-let activeIndustry = 'all', activeTier = 'all', activeStatus = 'all', searchQ = '', activeType = 'all';
+let activeIndustry = 'all', activeTier = 'all', activeStatus = 'all', searchQ = '';
 
 // ── DATA LOADING ─────────────────────────────────────────────────────────────
 async function loadAgents() {
@@ -885,10 +833,9 @@ function getFiltered() {
     if (a['Status'] !== 'backlog') return false;
     const matchInd  = activeIndustry === 'all' || a['Industry'] === activeIndustry;
     const matchTier = activeTier === 'all' || a['Tier'] === activeTier;
-    const matchType = activeType === 'all' || a['Use Case Type'] === activeType;
     const q = searchQ.toLowerCase();
-    const matchQ = !q || [a['Agent Name'], a['Industry'], a['Description'], a['Use Case Type'], a['Connectors / Features']].some(f => f && f.toLowerCase().includes(q));
-    return matchInd && matchTier && matchType && matchQ;
+    const matchQ = !q || [a['Agent Name'], a['Industry'], a['Description'], a['Connectors / Features']].some(f => f && f.toLowerCase().includes(q));
+    return matchInd && matchTier && matchQ;
   });
 }
 
@@ -941,7 +888,6 @@ function render() {
         </div>
         <div class="card-desc">${a['Description']}</div>
         <div class="card-footer">
-          <span class="use-case-tag">${a['Use Case Type']}</span>
           ${statusBadge(a['Status'])}
           <span class="card-arrow">&#x2192;</span>
         </div>
@@ -1020,7 +966,6 @@ function openPanel(a) {
   document.getElementById('panelTitle').textContent = a['Agent Name'];
   document.getElementById('panelBadges').innerHTML = `
     <span class="panel-badge ${tc}">${a['Tier']}</span>
-    <span class="panel-badge uc">${a['Use Case Type']}</span>
     ${statusBadge(a['Status'])}`;
 
   document.getElementById('panelBody').innerHTML = `
@@ -1144,15 +1089,6 @@ document.getElementById('searchInput').addEventListener('input', e => {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
-// Type pill filter
-document.querySelectorAll('.type-pill').forEach(pill => {
-  pill.addEventListener('click', () => {
-    document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('active'));
-    pill.classList.add('active');
-    activeType = pill.dataset.type;
-    render();
-  });
-});
 
 // View toggle
 document.getElementById('viewGrid').addEventListener('click', () => {
