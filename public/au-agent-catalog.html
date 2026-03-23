@@ -64,6 +64,18 @@
   .logo-text { font-size: 15px; font-weight: 600; letter-spacing: .01em; }
   .logo-sub  { font-size: 11px; color: var(--teal-pale); letter-spacing: .08em; text-transform: uppercase; }
 
+  .user-greeting {
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .user-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--teal); color: var(--dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .user-name { font-size: 13px; color: rgba(255,255,255,.75); }
+  .user-name strong { color: white; font-weight: 600; }
+
   .header-search {
     flex: 1; max-width: 480px;
     display: flex; align-items: center;
@@ -602,6 +614,17 @@
 <!-- HEADER -->
 <header>
   <div class="header-inner">
+    <div class="logo-block">
+      <div class="logo-m">m</div>
+      <div>
+        <div class="logo-text">AI Studio</div>
+        <div class="logo-sub">Agent Catalog</div>
+      </div>
+    </div>
+    <div class="user-greeting" id="userGreeting" style="display:none">
+      <div class="user-avatar" id="userAvatar"></div>
+      <span class="user-name">Hi, <strong id="userName"></strong></span>
+    </div>
   </div>
 </header>
 
@@ -680,6 +703,28 @@
 </footer>
 
 <script>
+// ── USER GREETING ─────────────────────────────────────────────────────────────
+async function loadUser() {
+  try {
+    const res = await fetch('/.auth/me');
+    if (!res.ok) return;
+    const { clientPrincipal } = await res.json();
+    if (!clientPrincipal) return;
+
+    // Prefer display name from claims, fall back to userDetails (email)
+    const nameClaim = (clientPrincipal.claims || []).find(c => c.typ === 'name');
+    const raw = nameClaim?.val || clientPrincipal.userDetails || '';
+    // Use first name only
+    const firstName = raw.split(/[\s@]/)[0];
+    const initials  = raw.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() || '?';
+
+    document.getElementById('userName').textContent  = firstName;
+    document.getElementById('userAvatar').textContent = initials;
+    document.getElementById('userGreeting').style.display = 'flex';
+  } catch { /* not on SWA or not logged in — silently skip */ }
+}
+loadUser();
+
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 const API_URL = 'https://agentcatalog-h0bpacatgndybfdz.australiaeast-01.azurewebsites.net/api/agents';
 
