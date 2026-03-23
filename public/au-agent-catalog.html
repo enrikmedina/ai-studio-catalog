@@ -1014,7 +1014,11 @@ async function postClaim(payload) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    let detail = '';
+    try { detail = (await res.json()).error || ''; } catch {}
+    throw new Error(`HTTP ${res.status}${detail ? ': ' + detail : ''}`);
+  }
   return res.json(); // { id, url }
 }
 
@@ -1032,10 +1036,10 @@ async function claimAgent() {
     });
     btn.className = 'btn-claim claimed';
     btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
-  } catch {
+  } catch (err) {
     btn.disabled = false;
     btn.textContent = 'Claim this agent';
-    alert('Could not create ADO work item — please try again.');
+    alert('Could not create ADO work item — ' + err.message);
   }
 }
 
@@ -1054,10 +1058,10 @@ async function claimVariation(btn, variationName) {
     });
     btn.className = 'iter-claim-btn claimed';
     btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
-  } catch {
+  } catch (err) {
     btn.disabled = false;
     btn.textContent = 'Claim this variation';
-    alert('Could not create ADO work item — please try again.');
+    alert('Could not create ADO work item — ' + err.message);
   }
 }
 
