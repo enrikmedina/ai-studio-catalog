@@ -16,6 +16,10 @@ interface SharePointFields {
   Status?: string;
   Published?: boolean | string;
   Iterations?: string;
+  ClaimedBy?: string;
+  ClaimedTaskId?: number;
+  ClaimedTaskUrl?: string;
+  ClaimedVariations?: string;
 }
 
 interface SharePointItem {
@@ -38,6 +42,10 @@ interface Agent {
   upsellPath: string;
   status: string;
   iterations: string;
+  claimedBy: string;
+  claimedTaskId: number | null;
+  claimedTaskUrl: string;
+  claimedVariations: string;
 }
 
 // Cache token to avoid acquiring a new one on every request
@@ -88,6 +96,10 @@ function mapItem(item: SharePointItem): Agent {
     upsellPath: f.UpsellPath ?? "",
     status: f.Status ?? "available",
     iterations: f.Iterations ?? "",
+    claimedBy: f.ClaimedBy ?? "",
+    claimedTaskId: f.ClaimedTaskId ?? null,
+    claimedTaskUrl: f.ClaimedTaskUrl ?? "",
+    claimedVariations: f.ClaimedVariations ?? "",
   };
 }
 

@@ -813,6 +813,10 @@ async function loadAgents() {
       'Upsell Path':             a.upsellPath,
       'Status':                  a.status,
       'Iterations':              a.iterations,
+      'ClaimedBy':               a.claimedBy        || '',
+      'ClaimedTaskId':           a.claimedTaskId     || null,
+      'ClaimedTaskUrl':          a.claimedTaskUrl    || '',
+      'ClaimedVariations':       a.claimedVariations || '',
     }));
 
     const backlogAgents = AGENTS.filter(a => a['Status'] === 'backlog');
@@ -906,15 +910,15 @@ function render() {
 }
 
 // ── ITERATIONS ────────────────────────────────────────────────────────────────
-function varClaimKey(agentId, variationName) {
-  return `${agentId}::var::${variationName}`;
-}
-
-function renderIterations(raw, agentId) {
+function renderIterations(raw, agentId, claimedVariationsRaw) {
   if (!raw) return '';
   let items;
   try { items = JSON.parse(raw); } catch { return ''; }
   if (!items.length) return '';
+
+  let claimedVars = [];
+  try { claimedVars = JSON.parse(claimedVariationsRaw || '[]'); } catch {}
+  const claimedVarMap = Object.fromEntries(claimedVars.map(v => [v.name, v]));
 
   const TIER_CLS = { 'Prompt Agent': 't1', 'Connected Agent': 't3', 'Orchestration Agent': 't5' };
 
@@ -943,9 +947,9 @@ function renderIterations(raw, agentId) {
         ${it.buildNotes ? `<div class="iter-row"><strong>Build Notes</strong>${it.buildNotes}</div>` : ''}
         ${it.upsell ? `<div class="iter-upsell">&#x2794; ${it.upsell}</div>` : ''}
         ${(function(){
-          const prior = getClaimedAgent(varClaimKey(agentId, it.name));
+          const prior = claimedVarMap[it.name];
           if (prior) {
-            return `<button class="iter-claim-btn claimed" disabled>✓ Claimed &mdash; <a href="${prior.url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${prior.id}</a></button>`;
+            return `<button class="iter-claim-btn claimed" disabled>✓ Claimed &mdash; <a href="${prior.taskUrl}" target="_blank" style="color:inherit;text-decoration:underline">Task #${prior.taskId}</a></button>`;
           }
           return `<button class="iter-claim-btn" onclick="claimVariation(this,'${it.name.replace(/'/g,"\\'")}','${(agentId||'').replace(/'/g,"\\'")}')">Claim this variation</button>`;
         })()}
@@ -1003,7 +1007,7 @@ function openPanel(a) {
       <div class="section-label">Upsell path</div>
       <div class="section-text">${a['Upsell Path']}</div>
     </div>
-    ${renderIterations(a['Iterations'], a['id'])}`;
+    ${renderIterations(a['Iterations'], a['id'], a['ClaimedVariations'])}`;
 
   // Claim button — only show for backlog agents
   const claimBtn = document.getElementById('claimBtn');
@@ -1011,11 +1015,10 @@ function openPanel(a) {
     claimBtn.style.display = '';
     claimBtn.dataset.agentId   = a['id'] || '';
     claimBtn.dataset.agentName = a['Agent Name'];
-    const prior = getClaimedAgent(a['id']);
-    if (prior) {
+    if (a['ClaimedBy']) {
       claimBtn.className = 'btn-claim claimed';
       claimBtn.disabled = true;
-      claimBtn.innerHTML = `✓ Claimed &mdash; <a href="${prior.url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${prior.id}</a>`;
+      claimBtn.innerHTML = `✓ Claimed &mdash; <a href="${a['ClaimedTaskUrl']}" target="_blank" style="color:inherit;text-decoration:underline">Task #${a['ClaimedTaskId']}</a>`;
     } else {
       claimBtn.className = 'btn-claim';
       claimBtn.textContent = 'Claim this agent';
@@ -1028,20 +1031,6 @@ function openPanel(a) {
   document.getElementById('overlay').classList.add('open');
   document.getElementById('panel').classList.add('open');
   document.body.style.overflow = 'hidden';
-}
-
-// ── CLAIM PERSISTENCE ──────────────────────────────────────────────────────────
-const CLAIMED_KEY = 'aic_claimed_agents';
-function getClaimedAgent(agentId) {
-  try { return JSON.parse(localStorage.getItem(CLAIMED_KEY) || '{}')[agentId] || null; }
-  catch { return null; }
-}
-function saveClaimedAgent(agentId, data) {
-  try {
-    const map = JSON.parse(localStorage.getItem(CLAIMED_KEY) || '{}');
-    map[agentId] = data;
-    localStorage.setItem(CLAIMED_KEY, JSON.stringify(map));
-  } catch {}
 }
 
 // ── CLAIM ──────────────────────────────────────────────────────────────────────
@@ -1066,6 +1055,7 @@ async function claimAgent() {
   btn.textContent = 'Claiming…';
   try {
     const { id, url } = await postClaim({
+      sharePointId: btn.dataset.agentId,
       agentName:    btn.dataset.agentName,
       industry:     a['Industry']                       || '',
       tier:         a['Tier']                           || '',
@@ -1078,7 +1068,8 @@ async function claimAgent() {
       status:       a['Status']                         || '',
       iterations:   JSON.stringify(a['Iterations'] || []),
     });
-    saveClaimedAgent(btn.dataset.agentId, { id, url });
+    // Update local AGENTS entry so panel shows locked on next open without a reload
+    if (a) { a['ClaimedBy'] = currentUserEmail; a['ClaimedTaskId'] = id; a['ClaimedTaskUrl'] = url; }
     btn.className = 'btn-claim claimed';
     btn.disabled  = true;
     btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
@@ -1097,20 +1088,28 @@ async function claimVariation(btn, variationName, agentId) {
   btn.textContent = 'Claiming…';
   try {
     const { id, url } = await postClaim({
-      agentName:     agentBtn?.dataset.agentName        || '',
-      variationName: variationName,
-      industry:      a['Industry']                      || '',
-      tier:          a['Tier']                          || '',
-      description:   a['Description']                  || '',
-      whyItMatters:  a['Why It Matters']                || '',
-      auContext:     a['AU-Specific Context']            || '',
-      buildNotes:    a['Copilot Studio Build Notes']    || '',
-      connectors:    a['Connectors / Features']         || '',
-      upsellPath:    a['Upsell Path']                   || '',
-      status:        a['Status']                        || '',
-      iterations:    JSON.stringify(a['Iterations'] || []),
+      sharePointId:             resolvedId,
+      agentName:                agentBtn?.dataset.agentName        || '',
+      variationName:            variationName,
+      currentClaimedVariations: a['ClaimedVariations']             || '',
+      industry:                 a['Industry']                      || '',
+      tier:                     a['Tier']                          || '',
+      description:              a['Description']                   || '',
+      whyItMatters:             a['Why It Matters']                || '',
+      auContext:                a['AU-Specific Context']            || '',
+      buildNotes:               a['Copilot Studio Build Notes']    || '',
+      connectors:               a['Connectors / Features']         || '',
+      upsellPath:               a['Upsell Path']                   || '',
+      status:                   a['Status']                        || '',
+      iterations:               JSON.stringify(a['Iterations'] || []),
     });
-    saveClaimedAgent(varClaimKey(resolvedId, variationName), { id, url });
+    // Update local AGENTS entry so variations re-render locked on next open
+    if (a) {
+      let vars = []; try { vars = JSON.parse(a['ClaimedVariations'] || '[]'); } catch {}
+      vars = vars.filter(v => v.name !== variationName);
+      vars.push({ name: variationName, claimedBy: currentUserEmail, taskId: id, taskUrl: url });
+      a['ClaimedVariations'] = JSON.stringify(vars);
+    }
     btn.className = 'iter-claim-btn claimed';
     btn.disabled  = true;
     btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
