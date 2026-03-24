@@ -838,9 +838,20 @@ async function loadAgents() {
 }
 
 // ── FILTER ───────────────────────────────────────────────────────────────────
+function isFullyClaimed(a) {
+  if (!a['ClaimedBy']) return false; // parent not claimed — always show
+  let iters = [];
+  try { iters = JSON.parse(a['Iterations'] || '[]'); } catch {}
+  if (!iters.length) return true; // claimed + no variations → hide
+  let claimedVars = [];
+  try { claimedVars = JSON.parse(a['ClaimedVariations'] || '[]'); } catch {}
+  return iters.every(it => claimedVars.some(v => v.name === it.name)); // all variations claimed → hide
+}
+
 function getFiltered() {
   return AGENTS.filter(a => {
     if (a['Status'] !== 'backlog') return false;
+    if (isFullyClaimed(a)) return false;
     const matchInd  = activeIndustry === 'all' || a['Industry'] === activeIndustry;
     const matchTier = activeTier === 'all' || a['Tier'] === activeTier;
     const q = searchQ.toLowerCase();
@@ -923,7 +934,7 @@ function renderIterations(raw, agentId, claimedVariationsRaw) {
   const TIER_CLS = { 'Prompt Agent': 't1', 'Connected Agent': 't3', 'Orchestration Agent': 't5' };
 
   let lastGroup = null;
-  const cards = items.map((it, i) => {
+  const cards = items.filter(it => !claimedVarMap[it.name]).map((it, i) => {
     const tc = TIER_CLS[it.tier] || 't3';
     const groupHeader = it.group && it.group !== lastGroup
       ? `<div class="iter-group-header">${it.group}</div>`
@@ -1068,11 +1079,13 @@ async function claimAgent() {
       status:       a['Status']                         || '',
       iterations:   JSON.stringify(a['Iterations'] || []),
     });
-    // Update local AGENTS entry so panel shows locked on next open without a reload
+    // Update local AGENTS entry
     if (a) { a['ClaimedBy'] = currentUserEmail; a['ClaimedTaskId'] = id; a['ClaimedTaskUrl'] = url; }
     btn.className = 'btn-claim claimed';
     btn.disabled  = true;
     btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
+    // If no variations (nothing left to claim), close panel and remove card after a beat
+    if (a && isFullyClaimed(a)) setTimeout(() => { closePanel(); render(); }, 800);
   } catch (err) {
     btn.disabled = false;
     btn.textContent = 'Claim this agent';
@@ -1103,7 +1116,7 @@ async function claimVariation(btn, variationName, agentId) {
       status:                   a['Status']                        || '',
       iterations:               JSON.stringify(a['Iterations'] || []),
     });
-    // Update local AGENTS entry so variations re-render locked on next open
+    // Update local AGENTS entry
     if (a) {
       let vars = []; try { vars = JSON.parse(a['ClaimedVariations'] || '[]'); } catch {}
       vars = vars.filter(v => v.name !== variationName);
@@ -1113,6 +1126,11 @@ async function claimVariation(btn, variationName, agentId) {
     btn.className = 'iter-claim-btn claimed';
     btn.disabled  = true;
     btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
+    // Remove variation card from DOM immediately; close panel + re-render if agent is now fully claimed
+    setTimeout(() => {
+      btn.closest('.iteration-card')?.remove();
+      if (a && isFullyClaimed(a)) { closePanel(); render(); }
+    }, 800);
   } catch (err) {
     btn.disabled = false;
     btn.textContent = 'Claim this variation';
