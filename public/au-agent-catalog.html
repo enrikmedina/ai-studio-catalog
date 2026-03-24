@@ -1056,10 +1056,17 @@ async function claimAgent() {
   btn.textContent = 'Claiming…';
   try {
     const { id, url } = await postClaim({
-      agentName:   btn.dataset.agentName,
-      description: a['Description'] || '',
-      industry:    a['Industry']    || '',
-      tier:        a['Tier']        || '',
+      agentName:    btn.dataset.agentName,
+      industry:     a['Industry']                       || '',
+      tier:         a['Tier']                           || '',
+      description:  a['Description']                   || '',
+      whyItMatters: a['Why It Matters']                 || '',
+      auContext:    a['AU-Specific Context']             || '',
+      buildNotes:   a['Copilot Studio Build Notes']     || '',
+      connectors:   a['Connectors / Features']          || '',
+      upsellPath:   a['Upsell Path']                    || '',
+      status:       a['Status']                         || '',
+      iterations:   JSON.stringify(a['Iterations'] || []),
     });
     saveClaimedAgent(btn.dataset.agentId, { id, url });
     btn.className = 'btn-claim claimed';
@@ -1079,11 +1086,18 @@ async function claimVariation(btn, variationName) {
   btn.textContent = 'Claiming…';
   try {
     const { id, url } = await postClaim({
-      agentName:     agentBtn?.dataset.agentName || '',
+      agentName:     agentBtn?.dataset.agentName        || '',
       variationName: variationName,
-      description:   a['Description'] || '',
-      industry:      a['Industry']    || '',
-      tier:          a['Tier']        || '',
+      industry:      a['Industry']                      || '',
+      tier:          a['Tier']                          || '',
+      description:   a['Description']                  || '',
+      whyItMatters:  a['Why It Matters']                || '',
+      auContext:     a['AU-Specific Context']            || '',
+      buildNotes:    a['Copilot Studio Build Notes']    || '',
+      connectors:    a['Connectors / Features']         || '',
+      upsellPath:    a['Upsell Path']                   || '',
+      status:        a['Status']                        || '',
+      iterations:    JSON.stringify(a['Iterations'] || []),
     });
     btn.className = 'iter-claim-btn claimed';
     btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
