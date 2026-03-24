@@ -800,6 +800,7 @@ async function loadAgents() {
 
     // Map API shape → internal shape used by render()
     AGENTS = data.map(a => ({
+      'id':                      a.id,
       'Industry':                a.industry,
       'Agent Name':              a.name,
       'Tier':                    a.tier,
