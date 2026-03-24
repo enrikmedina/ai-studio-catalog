@@ -585,7 +585,7 @@
   .btn-claim:disabled { opacity: .5; cursor: default; }
   .btn-claim.claimed {
     background: rgba(52,223,186,.15); color: #0a8a66;
-    border: 1.5px solid var(--teal-pale); cursor: default;
+    border: 1.5px solid var(--teal-pale); cursor: default; opacity: 1;
   }
   .btn-primary {
     flex: 1; background: var(--dark); color: white;
@@ -998,11 +998,18 @@ function openPanel(a) {
   const claimBtn = document.getElementById('claimBtn');
   if (a['Status'] === 'backlog') {
     claimBtn.style.display = '';
-    claimBtn.className = 'btn-claim';
-    claimBtn.textContent = 'Claim this agent';
-    claimBtn.disabled = false;
     claimBtn.dataset.agentId   = a['id'] || '';
     claimBtn.dataset.agentName = a['Agent Name'];
+    const prior = getClaimedAgent(a['id']);
+    if (prior) {
+      claimBtn.className = 'btn-claim claimed';
+      claimBtn.disabled = true;
+      claimBtn.innerHTML = `✓ Claimed &mdash; <a href="${prior.url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${prior.id}</a>`;
+    } else {
+      claimBtn.className = 'btn-claim';
+      claimBtn.textContent = 'Claim this agent';
+      claimBtn.disabled = false;
+    }
   } else {
     claimBtn.style.display = 'none';
   }
@@ -1010,6 +1017,20 @@ function openPanel(a) {
   document.getElementById('overlay').classList.add('open');
   document.getElementById('panel').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+// ── CLAIM PERSISTENCE ──────────────────────────────────────────────────────────
+const CLAIMED_KEY = 'aic_claimed_agents';
+function getClaimedAgent(agentId) {
+  try { return JSON.parse(localStorage.getItem(CLAIMED_KEY) || '{}')[agentId] || null; }
+  catch { return null; }
+}
+function saveClaimedAgent(agentId, data) {
+  try {
+    const map = JSON.parse(localStorage.getItem(CLAIMED_KEY) || '{}');
+    map[agentId] = data;
+    localStorage.setItem(CLAIMED_KEY, JSON.stringify(map));
+  } catch {}
 }
 
 // ── CLAIM ──────────────────────────────────────────────────────────────────────
@@ -1039,7 +1060,9 @@ async function claimAgent() {
       industry:    a['Industry']    || '',
       tier:        a['Tier']        || '',
     });
+    saveClaimedAgent(btn.dataset.agentId, { id, url });
     btn.className = 'btn-claim claimed';
+    btn.disabled  = true;
     btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
   } catch (err) {
     btn.disabled = false;
