@@ -569,7 +569,7 @@
   }
   .iter-claim-btn:hover { opacity: .85; }
   .iter-claim-btn:disabled { opacity: .5; cursor: default; }
-  .iter-claim-btn.claimed { background: rgba(52,223,186,.15); color: #0a8a66; border: 1px solid var(--teal-pale); cursor: default; }
+  .iter-claim-btn.claimed { background: rgba(52,223,186,.15); color: #0a8a66; border: 1px solid var(--teal-pale); cursor: default; opacity: 1; }
 
   .panel-actions {
     display: flex; gap: 10px;
@@ -906,7 +906,11 @@ function render() {
 }
 
 // ── ITERATIONS ────────────────────────────────────────────────────────────────
-function renderIterations(raw) {
+function varClaimKey(agentId, variationName) {
+  return `${agentId}::var::${variationName}`;
+}
+
+function renderIterations(raw, agentId) {
   if (!raw) return '';
   let items;
   try { items = JSON.parse(raw); } catch { return ''; }
@@ -938,7 +942,13 @@ function renderIterations(raw) {
         ${it.connector ? `<div class="iter-row"><strong>Connectors &amp; Features</strong>${it.connector}</div>` : ''}
         ${it.buildNotes ? `<div class="iter-row"><strong>Build Notes</strong>${it.buildNotes}</div>` : ''}
         ${it.upsell ? `<div class="iter-upsell">&#x2794; ${it.upsell}</div>` : ''}
-        <button class="iter-claim-btn" onclick="claimVariation(this,'${it.name.replace(/'/g,"\\'")}')">Claim this variation</button>
+        ${(function(){
+          const prior = getClaimedAgent(varClaimKey(agentId, it.name));
+          if (prior) {
+            return `<button class="iter-claim-btn claimed" disabled>✓ Claimed &mdash; <a href="${prior.url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${prior.id}</a></button>`;
+          }
+          return `<button class="iter-claim-btn" onclick="claimVariation(this,'${it.name.replace(/'/g,"\\'")}','${(agentId||'').replace(/'/g,"\\'")}')">Claim this variation</button>`;
+        })()}
       </div>
     </div>`;
   }).join('');
@@ -993,7 +1003,7 @@ function openPanel(a) {
       <div class="section-label">Upsell path</div>
       <div class="section-text">${a['Upsell Path']}</div>
     </div>
-    ${renderIterations(a['Iterations'])}`;
+    ${renderIterations(a['Iterations'], a['id'])}`;
 
   // Claim button — only show for backlog agents
   const claimBtn = document.getElementById('claimBtn');
@@ -1079,9 +1089,10 @@ async function claimAgent() {
   }
 }
 
-async function claimVariation(btn, variationName) {
+async function claimVariation(btn, variationName, agentId) {
   const agentBtn = document.getElementById('claimBtn');
-  const a        = AGENTS.find(x => x['id'] === agentBtn?.dataset.agentId) || {};
+  const resolvedId = agentId || agentBtn?.dataset.agentId || '';
+  const a        = AGENTS.find(x => x['id'] === resolvedId) || {};
   btn.disabled = true;
   btn.textContent = 'Claiming…';
   try {
@@ -1099,7 +1110,9 @@ async function claimVariation(btn, variationName) {
       status:        a['Status']                        || '',
       iterations:    JSON.stringify(a['Iterations'] || []),
     });
+    saveClaimedAgent(varClaimKey(resolvedId, variationName), { id, url });
     btn.className = 'iter-claim-btn claimed';
+    btn.disabled  = true;
     btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
   } catch (err) {
     btn.disabled = false;
