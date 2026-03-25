@@ -12,16 +12,20 @@
     --teal-mid:  #81EBD4;
     --teal-pale: #B2EDE3;
     --cream:     #F2F1ED;
+    --card-bg:   #FDFCFA;
     --dark:      #1A1A2E;
     --ink:       #212529;
     --muted:     #6B7280;
     --border:    #E2E0D8;
+    --gold:      #C4982B;
+    --gold-bg:   #FDF6E3;
+    --gold-pale: #F0DFA0;
     --t1-bg:     #EAF3DE; --t1:  #3B6D11;
     --t3-bg:     #FAEEDA; --t3:  #854F0B;
     --t5-bg:     #FCEBEB; --t5:  #A32D2D;
     --radius:    10px;
     --shadow:    0 2px 12px rgba(0,0,0,.08);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,.14);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,.16);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,6 +35,13 @@
     background: var(--cream);
     color: var(--ink);
     min-height: 100vh;
+  }
+  /* Subtle paper grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 1;
   }
 
   /* ── HEADER (white mySMB.com style) ── */
@@ -254,12 +265,12 @@
 
   /* ── CARD ── */
   .card {
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius);
     border: 1.5px solid var(--border);
-    padding: 20px 20px 20px 24px;
+    padding: 20px 20px 20px 26px;
     cursor: pointer;
-    transition: all .18s;
+    transition: transform .2s cubic-bezier(.2,0,.2,1), box-shadow .2s cubic-bezier(.2,0,.2,1), border-color .2s;
     position: relative;
     overflow: hidden;
     display: flex; flex-direction: column; gap: 10px;
@@ -267,21 +278,30 @@
   /* Left colored border via pseudo-element */
   .card::before {
     content: '';
-    position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
+    position: absolute; top: 0; left: 0; bottom: 0; width: 5px;
     background: var(--border);
-    transition: background .18s;
+    transition: width .2s cubic-bezier(.2,0,.2,1);
   }
   .card.tier-1::before { background: var(--t1); }
   .card.tier-3::before { background: var(--t3); }
   .card.tier-5::before { background: var(--t5); }
   .card:hover {
-    border-color: var(--teal);
+    border-color: rgba(52,223,186,.4);
     box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.012);
   }
+  .card:hover::before { width: 7px; }
 
   .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-  .card-title  { font-size: 14px; font-weight: 600; line-height: 1.35; color: var(--dark); }
+  .card-title  {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px; font-weight: 400; line-height: 1.3; color: var(--dark);
+  }
+  .card-use-case {
+    font-size: 10px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .07em;
+    margin-top: -4px;
+  }
   .tier-badge  {
     flex-shrink: 0;
     font-size: 10px; font-weight: 700;
@@ -294,7 +314,7 @@
   .tier-badge.t5 { background: var(--t5-bg); color: var(--t5); }
 
   .card-desc {
-    font-size: 12.5px; color: var(--muted); line-height: 1.55;
+    font-size: 13.5px; color: var(--muted); line-height: 1.6;
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -303,8 +323,12 @@
     gap: 8px; margin-top: auto;
   }
 
-  .card-arrow { font-size: 14px; color: var(--border); transition: color .15s; }
-  .card:hover .card-arrow { color: var(--teal); }
+  .card-view-link {
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    letter-spacing: .01em;
+    transition: color .15s;
+  }
+  .card:hover .card-view-link { color: var(--teal); }
   .variations-strip {
     display: flex; align-items: center; gap: 8px;
     border-top: 1px solid var(--border);
@@ -429,6 +453,12 @@
     padding: 28px 28px 24px;
     position: sticky; top: 0; z-index: 5;
   }
+  .panel-top::after {
+    content: '';
+    position: absolute; bottom: -20px; left: 0; right: 0; height: 20px;
+    background: linear-gradient(to bottom, rgba(26,26,46,.12), transparent);
+    pointer-events: none;
+  }
   .panel-close {
     position: absolute; top: 14px; right: 16px;
     background: rgba(255,255,255,.12);
@@ -446,7 +476,7 @@
   }
   .panel-title {
     font-family: 'DM Serif Display', serif;
-    font-size: 22px; color: white; line-height: 1.2;
+    font-size: 26px; color: white; line-height: 1.2;
     margin-bottom: 14px;
   }
   .panel-badges { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -462,8 +492,8 @@
   .panel-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
 
   .section-label {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .1em; color: var(--muted);
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--muted);
     margin-bottom: 6px;
   }
   .section-text { font-size: 13.5px; line-height: 1.65; color: var(--ink); }
@@ -481,22 +511,22 @@
   .info-box-text strong { color: var(--ink); font-weight: 600; }
 
   .upsell-box {
-    background: linear-gradient(135deg, rgba(52,223,186,.08), rgba(52,223,186,.03));
-    border: 1.5px solid var(--teal-pale);
+    background: linear-gradient(135deg, var(--gold-bg), rgba(253,246,227,.4));
+    border: 1.5px solid var(--gold-pale);
     border-radius: var(--radius); padding: 16px;
   }
-  .upsell-box .section-label { color: var(--teal); }
+  .upsell-box .section-label { color: var(--gold); }
   .upsell-box .section-text { color: var(--ink); font-size: 13px; }
 
   .why-box {
-    border-left: 3px solid var(--teal);
-    background: linear-gradient(135deg, rgba(52,223,186,.07), rgba(52,223,186,.02));
+    border-left: 4px solid var(--gold);
+    background: linear-gradient(135deg, rgba(196,152,43,.07), rgba(196,152,43,.02));
     border-radius: 0 var(--radius) var(--radius) 0;
     padding: 14px 16px;
   }
   .why-label {
     font-size: 10px; font-weight: 700; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--teal); margin-bottom: 7px;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 7px;
   }
   .why-text {
     font-family: 'DM Serif Display', serif;
@@ -619,11 +649,48 @@
 
   /* ── FOOTER ── */
   footer {
-    background: var(--dark); color: rgba(255,255,255,.4);
-    text-align: center; padding: 28px;
-    font-size: 12px; margin-top: 40px;
+    background: var(--dark);
+    margin-top: 48px;
+    padding: 40px 32px 28px;
   }
-  footer strong { color: var(--teal); }
+  .footer-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 32px; margin-bottom: 32px;
+  }
+  .footer-tier {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .footer-tier-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 4px;
+  }
+  .footer-tier-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .footer-tier-name {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; color: white;
+  }
+  .footer-tier-pts {
+    font-size: 11px; font-weight: 600; color: var(--teal);
+    margin-left: auto;
+  }
+  .footer-tier-desc {
+    font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,.45);
+  }
+  .footer-divider {
+    height: 1px; background: rgba(255,255,255,.08); margin-bottom: 20px;
+  }
+  .footer-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; color: rgba(255,255,255,.3);
+  }
+  .footer-bottom strong { color: var(--teal); }
+  @media (max-width: 768px) {
+    .footer-inner { grid-template-columns: 1fr; gap: 20px; }
+    .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+  }
 
   /* ── CONTEXT STRIP ── */
   .context-strip {
@@ -672,6 +739,14 @@
   }
   .sort-select:hover, .sort-select:focus { border-color: var(--teal); color: white; }
   .sort-select option { background: var(--dark); color: white; }
+
+  /* ── FILTER ACTIVE INDICATOR ── */
+  .csearch-select.filter-active,
+  .sort-select.filter-active {
+    border-color: var(--teal);
+    color: white;
+    background-color: rgba(52,223,186,.12);
+  }
 
   /* ── EMPTY STATE CLEAR BUTTON ── */
   .btn-clear-filters {
@@ -814,7 +889,37 @@
 </div>
 
 <footer>
-  <strong>mySMB AI Studio</strong> &nbsp;&middot;&nbsp; Production-ready AI agents for Australian businesses &nbsp;&middot;&nbsp; Built on Microsoft Copilot Studio
+  <div class="footer-inner">
+    <div class="footer-tier">
+      <div class="footer-tier-header">
+        <div class="footer-tier-dot" style="background:var(--t1)"></div>
+        <span class="footer-tier-name">Prompt Agent</span>
+        <span class="footer-tier-pts">1 pt</span>
+      </div>
+      <div class="footer-tier-desc">Single-turn AI interactions. The agent takes an input, generates a response, and stops. No external connections required — ideal for drafting, summarising, and advising.</div>
+    </div>
+    <div class="footer-tier">
+      <div class="footer-tier-header">
+        <div class="footer-tier-dot" style="background:var(--t3)"></div>
+        <span class="footer-tier-name">Connected Agent</span>
+        <span class="footer-tier-pts">3 pts</span>
+      </div>
+      <div class="footer-tier-desc">Multi-step agent that connects to external systems — SharePoint, Xero, Outlook, Teams. It reads data, takes actions, and responds based on live information from integrated platforms.</div>
+    </div>
+    <div class="footer-tier">
+      <div class="footer-tier-header">
+        <div class="footer-tier-dot" style="background:var(--t5)"></div>
+        <span class="footer-tier-name">Orchestration Agent</span>
+        <span class="footer-tier-pts">5 pts</span>
+      </div>
+      <div class="footer-tier-desc">Complex end-to-end workflows that coordinate multiple systems, decisions, and sub-agents. Handles multi-step business processes like compliance tracking, payroll validation, and escalation chains.</div>
+    </div>
+  </div>
+  <div class="footer-divider"></div>
+  <div class="footer-bottom">
+    <span><strong>mySMB AI Studio</strong> &nbsp;&middot;&nbsp; Production-ready agents for Australian businesses</span>
+    <span>Built on Microsoft Copilot Studio</span>
+  </div>
 </footer>
 
 <script>
@@ -895,7 +1000,7 @@ function clearFilters() {
   document.getElementById('tierSelect').value     = 'all';
   document.getElementById('searchInput').value    = '';
   document.getElementById('sortSelect').value     = 'default';
-  syncURL(); render();
+  syncURL(); updateFilterIndicators(); render();
 }
 
 // ── DATA LOADING ─────────────────────────────────────────────────────────────
@@ -936,6 +1041,7 @@ async function loadAgents() {
     }, 0);
     document.getElementById('statVariations').textContent = totalVariations;
     initFromURL();
+    updateFilterIndicators();
     render();
   } catch (err) {
     console.error('Failed to load agents:', err);
@@ -1025,13 +1131,16 @@ function render() {
 
       card.innerHTML = `
         <div class="card-header">
-          <div class="card-title">${a['Agent Name']}</div>
+          <div>
+            <div class="card-title">${a['Agent Name']}</div>
+            ${a['Use Case Type'] ? `<div class="card-use-case">${a['Use Case Type']}</div>` : ''}
+          </div>
           <span class="tier-badge ${tc}">${TIER_LABEL[a['Tier']]}</span>
         </div>
         <div class="card-desc">${a['Description']}</div>
         <div class="card-footer">
           ${statusBadge(a['Status'])}
-          <span class="card-arrow">&#x2192;</span>
+          <span class="card-view-link">View details &rarr;</span>
         </div>
         ${varStrip}`;
       card.onclick = () => openPanel(a);
@@ -1270,14 +1379,20 @@ function openRequest() {
 }
 
 // ── EVENTS ────────────────────────────────────────────────────────────────────
+function updateFilterIndicators() {
+  document.getElementById('industrySelect').classList.toggle('filter-active', activeIndustry !== 'all');
+  document.getElementById('tierSelect').classList.toggle('filter-active', activeTier !== 'all');
+  document.getElementById('sortSelect').classList.toggle('filter-active', activeSort !== 'default');
+}
+
 document.getElementById('industrySelect').addEventListener('change', e => {
-  activeIndustry = e.target.value; syncURL(); render();
+  activeIndustry = e.target.value; syncURL(); updateFilterIndicators(); render();
 });
 document.getElementById('tierSelect').addEventListener('change', e => {
-  activeTier = e.target.value; syncURL(); render();
+  activeTier = e.target.value; syncURL(); updateFilterIndicators(); render();
 });
 document.getElementById('sortSelect').addEventListener('change', e => {
-  activeSort = e.target.value; syncURL(); render();
+  activeSort = e.target.value; syncURL(); updateFilterIndicators(); render();
 });
 let _searchTimer;
 document.getElementById('searchInput').addEventListener('input', e => {
