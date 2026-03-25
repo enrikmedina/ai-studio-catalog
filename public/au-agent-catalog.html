@@ -240,10 +240,14 @@
     grid-column: 1 / -1;
     display: flex; align-items: center; gap: 12px;
     padding: 8px 0 4px;
+    cursor: pointer;
+    user-select: none;
   }
+  .industry-heading:hover .industry-heading-text { color: var(--teal); }
   .industry-heading-text {
     font-family: 'DM Serif Display', serif;
     font-size: 26px; color: var(--dark); letter-spacing: -.01em;
+    transition: color .15s;
   }
   .industry-count {
     background: var(--teal);
@@ -251,8 +255,31 @@
     font-size: 11px; font-weight: 700;
     border-radius: 20px;
     padding: 2px 10px;
+    transition: opacity .15s;
   }
   .industry-line { flex: 1; height: 1px; background: var(--border); }
+  .industry-chevron {
+    font-size: 11px; color: var(--muted);
+    transition: transform .25s cubic-bezier(.4,0,.2,1), color .15s;
+    flex-shrink: 0;
+  }
+  .industry-heading.collapsed .industry-chevron { transform: rotate(-90deg); }
+  .industry-heading.collapsed .industry-count { opacity: .5; }
+
+  /* Collapsible grid wrapper */
+  .cards-grid-wrap {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows .3s cubic-bezier(.4,0,.2,1), opacity .25s;
+    opacity: 1;
+  }
+  .cards-grid-wrap.collapsed {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .cards-grid-wrap > .cards-grid { overflow: hidden; }
 
   /* Agent grid */
   .cards-grid {
@@ -975,6 +1002,23 @@ function statusBadge(status) {
 let AGENTS = [];
 let activeIndustry = 'all', activeTier = 'all', activeStatus = 'all', searchQ = '', activeSort = 'default';
 
+// ── COLLAPSIBLE SECTIONS ──────────────────────────────────────────────────────
+const COLLAPSE_KEY = 'catalog-collapsed-sections';
+let collapsedSections = new Set(JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'));
+
+function toggleSection(ind, headingEl, wrapEl) {
+  if (collapsedSections.has(ind)) {
+    collapsedSections.delete(ind);
+    headingEl.classList.remove('collapsed');
+    wrapEl.classList.remove('collapsed');
+  } else {
+    collapsedSections.add(ind);
+    headingEl.classList.add('collapsed');
+    wrapEl.classList.add('collapsed');
+  }
+  localStorage.setItem(COLLAPSE_KEY, JSON.stringify([...collapsedSections]));
+}
+
 // ── URL STATE ─────────────────────────────────────────────────────────────────
 function syncURL() {
   const p = new URLSearchParams();
@@ -1110,10 +1154,16 @@ function render() {
 
   catalog.innerHTML = '';
   Object.entries(byInd).forEach(([ind, agents]) => {
+    const isCollapsed = collapsedSections.has(ind);
+
     const heading = document.createElement('div');
-    heading.className = 'industry-heading';
-    heading.innerHTML = `<span class="industry-heading-text">${ind}</span><span class="industry-count">${agents.length}</span><div class="industry-line"></div>`;
+    heading.className = 'industry-heading' + (isCollapsed ? ' collapsed' : '');
+    heading.innerHTML = `<span class="industry-heading-text">${ind}</span><span class="industry-count">${agents.length}</span><div class="industry-line"></div><span class="industry-chevron">&#x25BE;</span>`;
+    heading.addEventListener('click', () => toggleSection(ind, heading, wrap));
     catalog.appendChild(heading);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'cards-grid-wrap' + (isCollapsed ? ' collapsed' : '');
 
     const grid = document.createElement('div');
     grid.className = 'cards-grid';
@@ -1145,7 +1195,8 @@ function render() {
       card.onclick = () => openPanel(a);
       grid.appendChild(card);
     });
-    catalog.appendChild(grid);
+    wrap.appendChild(grid);
+    catalog.appendChild(wrap);
   });
 }
 
