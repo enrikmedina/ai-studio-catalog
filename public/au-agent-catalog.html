@@ -234,37 +234,73 @@
     gap: 24px;
   }
 
-  /* Industry group headings */
+  /* Industry banner headings */
   .industry-group { display: contents; }
   .industry-heading {
     grid-column: 1 / -1;
-    display: flex; align-items: center; gap: 12px;
-    padding: 8px 0 4px;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
     cursor: pointer;
     user-select: none;
+    height: 130px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--dark);
+    box-shadow: 0 2px 16px rgba(0,0,0,.12);
+    transition: box-shadow .2s, transform .2s, height .3s cubic-bezier(.4,0,.2,1);
   }
-  .industry-heading:hover .industry-heading-text { color: var(--teal); }
+  .industry-heading:hover { box-shadow: 0 6px 28px rgba(0,0,0,.2); transform: translateY(-1px); }
+  /* Dark gradient overlay */
+  .industry-heading::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.45) 50%, rgba(0,0,0,.2) 100%);
+    transition: background .2s;
+  }
+  .industry-heading:hover::before { background: linear-gradient(90deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.5) 50%, rgba(0,0,0,.25) 100%); }
+  /* Inner layout */
+  .industry-heading-inner {
+    position: relative; z-index: 1;
+    height: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px;
+    gap: 16px;
+  }
+  .industry-heading-left { display: flex; flex-direction: column; gap: 6px; }
   .industry-heading-text {
     font-family: 'DM Serif Display', serif;
-    font-size: 26px; color: var(--dark); letter-spacing: -.01em;
-    transition: color .15s;
+    font-size: 28px; color: white; letter-spacing: -.01em;
+    line-height: 1.1;
+    text-shadow: 0 1px 8px rgba(0,0,0,.4);
   }
+  .industry-heading-sub {
+    font-size: 12px; font-weight: 500; color: rgba(255,255,255,.65);
+    letter-spacing: .03em;
+  }
+  .industry-heading-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
   .industry-count {
     background: var(--teal);
     color: var(--dark);
     font-size: 11px; font-weight: 700;
     border-radius: 20px;
-    padding: 2px 10px;
+    padding: 4px 12px;
     transition: opacity .15s;
+    white-space: nowrap;
   }
-  .industry-line { flex: 1; height: 1px; background: var(--border); }
   .industry-chevron {
-    font-size: 11px; color: var(--muted);
-    transition: transform .25s cubic-bezier(.4,0,.2,1), color .15s;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 12px;
+    transition: transform .25s cubic-bezier(.4,0,.2,1), background .15s;
     flex-shrink: 0;
   }
+  .industry-heading:hover .industry-chevron { background: rgba(255,255,255,.25); }
   .industry-heading.collapsed .industry-chevron { transform: rotate(-90deg); }
-  .industry-heading.collapsed .industry-count { opacity: .5; }
+  .industry-heading.collapsed .industry-count { opacity: .6; }
+  .industry-heading.collapsed { height: 72px; }
+  .industry-heading.collapsed .industry-heading-sub { display: none; }
 
   /* Collapsible grid wrapper */
   .cards-grid-wrap {
@@ -1033,6 +1069,20 @@ const API_URL   = FUNC_BASE + '/agents';
 
 let currentUserEmail = '';
 
+// ── INDUSTRY META (photo + tagline) ──────────────────────────────────────────
+const INDUSTRY_META = {
+  'Financial Services':           { photo: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&q=75&auto=format&fit=crop', sub: 'Bookkeeping, BAS, payroll & compliance' },
+  'Property & Real Estate':       { photo: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&q=75&auto=format&fit=crop', sub: 'Property management, leasing & sales' },
+  'Healthcare & Aged Care':       { photo: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=75&auto=format&fit=crop', sub: 'Patient care, compliance & administration' },
+  'Legal & Professional Services':{ photo: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&q=75&auto=format&fit=crop', sub: 'Contracts, matter management & billing' },
+  'Education':                    { photo: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=75&auto=format&fit=crop', sub: 'Student engagement, admin & compliance' },
+  'Retail & eCommerce':           { photo: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&q=75&auto=format&fit=crop', sub: 'Inventory, customer service & fulfilment' },
+  'Government & Local Council':   { photo: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=1200&q=75&auto=format&fit=crop', sub: 'Constituent services, compliance & reporting' },
+  'Construction & Trades':        { photo: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1200&q=75&auto=format&fit=crop', sub: 'Project management, quoting & safety' },
+  'Agriculture & Agribusiness':   { photo: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1200&q=75&auto=format&fit=crop', sub: 'Supply chain, compliance & operations' },
+  'HR & Workforce':               { photo: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1200&q=75&auto=format&fit=crop', sub: 'Onboarding, entitlements & workforce planning' },
+};
+
 // ── TIER MAPS ────────────────────────────────────────────────────────────────
 const TIER_CLASS = { 'Prompt Agent': 't1', 'Connected Agent': 't3', 'Orchestration Agent': 't5' };
 const TIER_LABEL = { 'Prompt Agent': 'Prompt Agent', 'Connected Agent': 'Connected Agent', 'Orchestration Agent': 'Orchestration Agent' };
@@ -1085,8 +1135,7 @@ function toggleCollapseAll() {
   } else {
     // Collapse all
     headings.forEach(h => {
-      const ind = h.querySelector('.industry-heading-text').textContent;
-      collapsedSections.add(ind);
+      collapsedSections.add(h.dataset.industry);
       h.classList.add('collapsed');
     });
     wraps.forEach(w => w.classList.add('collapsed'));
@@ -1247,9 +1296,22 @@ function render() {
   Object.entries(byInd).forEach(([ind, agents]) => {
     const isCollapsed = collapsedSections.has(ind);
 
+    const meta = INDUSTRY_META[ind] || {};
     const heading = document.createElement('div');
     heading.className = 'industry-heading' + (isCollapsed ? ' collapsed' : '');
-    heading.innerHTML = `<span class="industry-heading-text">${ind}</span><span class="industry-count">${agents.length}</span><div class="industry-line"></div><span class="industry-chevron">&#x25BE;</span>`;
+    heading.dataset.industry = ind;
+    if (meta.photo) heading.style.backgroundImage = `url('${meta.photo}')`;
+    heading.innerHTML = `
+      <div class="industry-heading-inner">
+        <div class="industry-heading-left">
+          <div class="industry-heading-text">${ind}</div>
+          ${meta.sub ? `<div class="industry-heading-sub">${meta.sub}</div>` : ''}
+        </div>
+        <div class="industry-heading-right">
+          <span class="industry-count">${agents.length} agent${agents.length !== 1 ? 's' : ''}</span>
+          <span class="industry-chevron">&#x25BE;</span>
+        </div>
+      </div>`;
     heading.addEventListener('click', () => toggleSection(ind, heading, wrap));
     catalog.appendChild(heading);
 
