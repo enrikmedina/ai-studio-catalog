@@ -263,44 +263,48 @@
   .industry-heading-inner {
     position: relative; z-index: 1;
     height: 100%;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 28px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 28px 20px;
     gap: 16px;
   }
-  .industry-heading-left { display: flex; flex-direction: column; gap: 6px; }
+  .industry-heading-left { display: flex; flex-direction: column; gap: 5px; }
   .industry-heading-text {
     font-family: 'DM Serif Display', serif;
-    font-size: 28px; color: white; letter-spacing: -.01em;
+    font-size: 30px; color: white; letter-spacing: -.01em;
     line-height: 1.1;
-    text-shadow: 0 1px 8px rgba(0,0,0,.4);
+    text-shadow: 0 2px 12px rgba(0,0,0,.35);
+  }
+  .industry-heading-meta {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .industry-count {
+    font-size: 11px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--teal);
+    white-space: nowrap;
+    transition: opacity .15s;
   }
   .industry-heading-sub {
-    font-size: 12px; font-weight: 500; color: rgba(255,255,255,.65);
-    letter-spacing: .03em;
+    font-size: 11px; font-weight: 400; color: rgba(255,255,255,.5);
+    letter-spacing: .02em;
   }
-  .industry-heading-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-  .industry-count {
-    background: var(--teal);
-    color: var(--dark);
-    font-size: 14px; font-weight: 700;
-    border-radius: 30px;
-    padding: 8px 20px;
-    transition: opacity .15s;
-    white-space: nowrap;
+  .industry-meta-dot {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: rgba(255,255,255,.3); flex-shrink: 0;
   }
+  .industry-heading-right { display: flex; align-items: flex-end; padding-bottom: 2px; flex-shrink: 0; }
   .industry-chevron {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: rgba(255,255,255,.15);
     display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 16px;
-    transition: transform .25s cubic-bezier(.4,0,.2,1), background .15s;
+    color: rgba(255,255,255,.7);
+    transition: transform .28s cubic-bezier(.4,0,.2,1), color .15s;
     flex-shrink: 0;
   }
-  .industry-heading:hover .industry-chevron { background: rgba(255,255,255,.25); }
+  .industry-chevron svg { display: block; }
+  .industry-heading:hover .industry-chevron { color: white; }
   .industry-heading.collapsed .industry-chevron { transform: rotate(-90deg); }
-  .industry-heading.collapsed .industry-count { opacity: .6; }
+  .industry-heading.collapsed .industry-count { opacity: .5; }
   .industry-heading.collapsed { height: 72px; }
-  .industry-heading.collapsed .industry-heading-sub { display: none; }
+  .industry-heading.collapsed .industry-heading-sub,
+  .industry-heading.collapsed .industry-meta-dot { display: none; }
 
   /* Collapsible grid wrapper */
   .cards-grid-wrap {
@@ -1305,11 +1309,17 @@ function render() {
       <div class="industry-heading-inner">
         <div class="industry-heading-left">
           <div class="industry-heading-text">${ind}</div>
-          ${meta.sub ? `<div class="industry-heading-sub">${meta.sub}</div>` : ''}
+          <div class="industry-heading-meta">
+            <span class="industry-count">${agents.length} agent${agents.length !== 1 ? 's' : ''}</span>
+            ${meta.sub ? `<span class="industry-meta-dot"></span><span class="industry-heading-sub">${meta.sub}</span>` : ''}
+          </div>
         </div>
         <div class="industry-heading-right">
-          <span class="industry-count">${agents.length} agent${agents.length !== 1 ? 's' : ''}</span>
-          <span class="industry-chevron">&#x25BE;</span>
+          <span class="industry-chevron">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
         </div>
       </div>`;
     heading.addEventListener('click', () => toggleSection(ind, heading, wrap));
