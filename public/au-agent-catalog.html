@@ -137,6 +137,7 @@
     z-index: 90;
     box-shadow: 0 2px 12px rgba(0,0,0,.25);
   }
+  /* context strip is not sticky — filter bar still anchors just below header */
   .filters-inner {
     max-width: 1400px; margin: 0 auto;
     padding: 14px 32px;
@@ -156,7 +157,7 @@
     border: 1.5px solid rgba(255,255,255,.25);
     border-radius: 14px;
     overflow: hidden;
-    width: 680px;
+    width: min(680px, 100%);
     transition: border-color .15s, background .15s;
   }
   .csearch:focus-within {
@@ -231,14 +232,14 @@
   }
   .industry-heading-text {
     font-family: 'DM Serif Display', serif;
-    font-size: 22px; color: var(--dark);
+    font-size: 26px; color: var(--dark); letter-spacing: -.01em;
   }
   .industry-count {
-    background: var(--dark);
-    color: white;
-    font-size: 11px; font-weight: 600;
+    background: var(--teal);
+    color: var(--dark);
+    font-size: 11px; font-weight: 700;
     border-radius: 20px;
-    padding: 2px 9px;
+    padding: 2px 10px;
   }
   .industry-line { flex: 1; height: 1px; background: var(--border); }
 
@@ -363,6 +364,7 @@
   }
   .status-available  { color: #fff; background: #0a8a66; font-weight: 700; }
   .status-in_build   { color: #b45309; background: rgba(245,158,11,.15); }
+  .status-backlog    { color: #7c6d3a; background: rgba(251,191,36,.10); border: 1px solid rgba(251,191,36,.28); }
 
   /* ── LOADING STATE ── */
   .loading-state {
@@ -428,12 +430,12 @@
     position: sticky; top: 0; z-index: 5;
   }
   .panel-close {
-    position: absolute; top: 16px; right: 20px;
+    position: absolute; top: 14px; right: 16px;
     background: rgba(255,255,255,.12);
-    border: none; border-radius: 6px;
+    border: none; border-radius: 8px;
     color: white; cursor: pointer;
-    width: 32px; height: 32px;
-    font-size: 18px;
+    width: 44px; height: 44px;
+    font-size: 16px;
     display: flex; align-items: center; justify-content: center;
     transition: background .15s;
   }
@@ -497,8 +499,9 @@
     text-transform: uppercase; color: var(--teal); margin-bottom: 7px;
   }
   .why-text {
-    font-size: 13.5px; line-height: 1.65; color: var(--ink);
+    font-family: 'DM Serif Display', serif;
     font-style: italic;
+    font-size: 15px; line-height: 1.65; color: var(--ink);
   }
 
   /* ── ITERATIONS ── */
@@ -622,17 +625,83 @@
   }
   footer strong { color: var(--teal); }
 
+  /* ── CONTEXT STRIP ── */
+  .context-strip {
+    background: linear-gradient(90deg, rgba(52,223,186,.08), rgba(52,223,186,.14), rgba(52,223,186,.08));
+    border-bottom: 1px solid rgba(52,223,186,.22);
+    text-align: center; padding: 7px 32px;
+  }
+  .context-strip-text {
+    font-size: 11px; font-weight: 700;
+    color: #1a6b58; letter-spacing: .08em; text-transform: uppercase;
+  }
+
+  /* ── CARD ENTRY ANIMATION ── */
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: cardIn .32s ease both; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+
+  /* ── BUILD NOTES BOX ── */
+  .build-notes-box {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px; line-height: 1.75;
+    background: #F5F4F0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    color: #2d3748;
+    white-space: pre-wrap; word-break: break-word;
+  }
+
+  /* ── SORT SELECT ── */
+  .sort-select {
+    background: rgba(255,255,255,.08);
+    border: 1.5px solid rgba(255,255,255,.18);
+    border-radius: 8px;
+    color: rgba(255,255,255,.7);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500;
+    padding: 6px 28px 6px 12px;
+    cursor: pointer; outline: none;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.45)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+    transition: border-color .15s;
+  }
+  .sort-select:hover, .sort-select:focus { border-color: var(--teal); color: white; }
+  .sort-select option { background: var(--dark); color: white; }
+
+  /* ── EMPTY STATE CLEAR BUTTON ── */
+  .btn-clear-filters {
+    background: white; color: var(--dark);
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 9px 22px; margin-top: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: border-color .15s, color .15s;
+    display: inline-block;
+  }
+  .btn-clear-filters:hover { border-color: var(--teal); color: var(--teal); }
+
   /* ── HIDDEN ── */
   .hidden { display: none !important; }
 
   @media (max-width: 768px) {
-    header, .filters-bar, .main { padding-left: 16px; padding-right: 16px; }
+    header, .main { padding-left: 16px; padding-right: 16px; }
     .header-center { max-width: none; }
     .header-stats { display: none; }
     .cards-grid { grid-template-columns: 1fr; }
     .panel-actions { flex-direction: column; }
     .view-list .card { flex-direction: column; }
     .view-list .card-footer { flex-direction: row; align-items: center; }
+    .context-strip { display: none; }
+    .filters-inner { padding: 10px 16px; grid-template-columns: auto 1fr; gap: 10px; }
+    .filters-center { grid-column: 1 / -1; order: -1; }
+    .filters-left { gap: 8px; }
+    .filters-right { display: none; }
+    .csearch-select { padding: 0 24px 0 10px; font-size: 12px; }
   }
 </style>
 </head>
@@ -656,6 +725,11 @@
     </div>
   </div>
 </header>
+
+<!-- CONTEXT STRIP -->
+<div class="context-strip">
+  <span class="context-strip-text">AI Studio Agent Backlog &nbsp;&mdash;&nbsp; Build-ready agents for Australian SMBs &nbsp;&mdash;&nbsp; Microsoft Copilot Studio</span>
+</div>
 
 <!-- FILTER BAR -->
 <div class="filters-bar">
@@ -707,8 +781,16 @@
         <button class="csearch-btn" tabindex="-1">🔍</button>
       </div>
     </div>
-    <!-- Right: empty (keeps search centered) -->
-    <div class="filters-right"></div>
+    <!-- Right: sort -->
+    <div class="filters-right">
+      <select class="sort-select" id="sortSelect" title="Sort agents">
+        <option value="default">Sort: Default</option>
+        <option value="name-az">Name A → Z</option>
+        <option value="name-za">Name Z → A</option>
+        <option value="variations">Most Variations</option>
+        <option value="tier">By Tier</option>
+      </select>
+    </div>
   </div>
 </div>
 
@@ -780,13 +862,41 @@ const STATUS_CONFIG = {
 
 function statusBadge(status) {
   const cfg = STATUS_CONFIG[status];
-  if (!cfg || status === 'backlog') return '';
+  if (!cfg) return '';
   return `<span class="status-badge ${cfg.cls}">${cfg.label}</span>`;
 }
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let AGENTS = [];
-let activeIndustry = 'all', activeTier = 'all', activeStatus = 'all', searchQ = '';
+let activeIndustry = 'all', activeTier = 'all', activeStatus = 'all', searchQ = '', activeSort = 'default';
+
+// ── URL STATE ─────────────────────────────────────────────────────────────────
+function syncURL() {
+  const p = new URLSearchParams();
+  if (activeIndustry !== 'all') p.set('industry', activeIndustry);
+  if (activeTier !== 'all')     p.set('tier', activeTier);
+  if (activeSort !== 'default') p.set('sort', activeSort);
+  if (searchQ)                  p.set('q', searchQ);
+  history.replaceState(null, '', p.toString() ? '?' + p.toString() : location.pathname);
+}
+
+function initFromURL() {
+  const p = new URLSearchParams(location.search);
+  if (p.get('industry')) { activeIndustry = p.get('industry'); document.getElementById('industrySelect').value = activeIndustry; }
+  if (p.get('tier'))     { activeTier     = p.get('tier');     document.getElementById('tierSelect').value     = activeTier; }
+  if (p.get('sort'))     { activeSort     = p.get('sort');     document.getElementById('sortSelect').value     = activeSort; }
+  if (p.get('q'))        { searchQ        = p.get('q');        document.getElementById('searchInput').value   = searchQ; }
+}
+
+// ── CLEAR FILTERS ─────────────────────────────────────────────────────────────
+function clearFilters() {
+  activeIndustry = 'all'; activeTier = 'all'; searchQ = ''; activeSort = 'default';
+  document.getElementById('industrySelect').value = 'all';
+  document.getElementById('tierSelect').value     = 'all';
+  document.getElementById('searchInput').value    = '';
+  document.getElementById('sortSelect').value     = 'default';
+  syncURL(); render();
+}
 
 // ── DATA LOADING ─────────────────────────────────────────────────────────────
 async function loadAgents() {
@@ -825,6 +935,7 @@ async function loadAgents() {
       try { return sum + JSON.parse(a['Iterations'] || '[]').length; } catch { return sum; }
     }, 0);
     document.getElementById('statVariations').textContent = totalVariations;
+    initFromURL();
     render();
   } catch (err) {
     console.error('Failed to load agents:', err);
@@ -848,8 +959,10 @@ function isFullyClaimed(a) {
   return iters.every(it => claimedVars.some(v => v.name === it.name)); // all variations claimed → hide
 }
 
+const TIER_ORDER = { 'Prompt Agent': 0, 'Connected Agent': 1, 'Orchestration Agent': 2 };
+
 function getFiltered() {
-  return AGENTS.filter(a => {
+  const base = AGENTS.filter(a => {
     if (a['Status'] !== 'backlog') return false;
     if (isFullyClaimed(a)) return false;
     const matchInd  = activeIndustry === 'all' || a['Industry'] === activeIndustry;
@@ -858,6 +971,16 @@ function getFiltered() {
     const matchQ = !q || [a['Agent Name'], a['Industry'], a['Description'], a['Connectors / Features']].some(f => f && f.toLowerCase().includes(q));
     return matchInd && matchTier && matchQ;
   });
+
+  if (activeSort === 'name-az') return [...base].sort((a, b) => a['Agent Name'].localeCompare(b['Agent Name']));
+  if (activeSort === 'name-za') return [...base].sort((a, b) => b['Agent Name'].localeCompare(a['Agent Name']));
+  if (activeSort === 'variations') return [...base].sort((a, b) => {
+    const aLen = (() => { try { return JSON.parse(a['Iterations'] || '[]').length; } catch { return 0; } })();
+    const bLen = (() => { try { return JSON.parse(b['Iterations'] || '[]').length; } catch { return 0; } })();
+    return bLen - aLen;
+  });
+  if (activeSort === 'tier') return [...base].sort((a, b) => (TIER_ORDER[a['Tier']] ?? 9) - (TIER_ORDER[b['Tier']] ?? 9));
+  return base; // default
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
@@ -870,16 +993,14 @@ function render() {
   const total = filtered.length + iterTotal; // eslint-disable-line no-unused-vars
 
   if (!filtered.length) {
-    catalog.innerHTML = '<div class="empty-state"><div class="em">&#x1F50D;</div><p>No agents match your filters. Try broadening your search.</p></div>';
+    catalog.innerHTML = '<div class="empty-state"><div class="em">&#x1F50D;</div><p>No agents match your filters.</p><button class="btn-clear-filters" onclick="clearFilters()">Clear filters</button></div>';
     return;
   }
 
-  // Group by industry
-  const byInd = {};
-  filtered.forEach(a => {
-    if (!byInd[a['Industry']]) byInd[a['Industry']] = [];
-    byInd[a['Industry']].push(a);
-  });
+  // Group by industry (flat when custom sort active)
+  const byInd = activeSort === 'default'
+    ? filtered.reduce((acc, a) => { (acc[a['Industry']] = acc[a['Industry']] || []).push(a); return acc; }, {})
+    : { 'All Agents': filtered };
 
   catalog.innerHTML = '';
   Object.entries(byInd).forEach(([ind, agents]) => {
@@ -899,7 +1020,7 @@ function render() {
       let iterCount = 0;
       try { iterCount = JSON.parse(a['Iterations'] || '[]').length; } catch {}
       const varStrip = iterCount > 0
-        ? `<div class="variations-strip"><span class="variations-strip-icon">&#x25A3;</span>${iterCount} variation${iterCount > 1 ? 's' : ''} available</div>`
+        ? `<div class="variations-strip"><svg class="variations-strip-icon" width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect x="1" y="5" width="11" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="5" y="1" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/></svg>${iterCount} variation${iterCount > 1 ? 's' : ''} available</div>`
         : '';
 
       card.innerHTML = `
@@ -1007,7 +1128,7 @@ function openPanel(a) {
     </div>` : ''}
     ${a['Description'] ? `<div class="iter-row"><strong>What it does</strong>${a['Description']}</div>` : ''}
     ${a['AU-Specific Context'] ? `<div class="iter-row"><strong>AU Context</strong>${a['AU-Specific Context']}</div>` : ''}
-    ${a['Copilot Studio Build Notes'] ? `<div class="iter-row"><strong>Build Notes</strong>${a['Copilot Studio Build Notes']}</div>` : ''}
+    ${a['Copilot Studio Build Notes'] ? `<div><div class="section-label">Build Notes</div><div class="build-notes-box">${a['Copilot Studio Build Notes']}</div></div>` : ''}
     <div class="info-box">
       <div class="info-box-row">
         <span class="info-box-icon">&#x1F50C;</span>
@@ -1150,13 +1271,18 @@ function openRequest() {
 
 // ── EVENTS ────────────────────────────────────────────────────────────────────
 document.getElementById('industrySelect').addEventListener('change', e => {
-  activeIndustry = e.target.value; render();
+  activeIndustry = e.target.value; syncURL(); render();
 });
 document.getElementById('tierSelect').addEventListener('change', e => {
-  activeTier = e.target.value; render();
+  activeTier = e.target.value; syncURL(); render();
 });
+document.getElementById('sortSelect').addEventListener('change', e => {
+  activeSort = e.target.value; syncURL(); render();
+});
+let _searchTimer;
 document.getElementById('searchInput').addEventListener('input', e => {
-  searchQ = e.target.value; render();
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(() => { searchQ = e.target.value; syncURL(); render(); }, 250);
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
