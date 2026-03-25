@@ -775,6 +775,51 @@
     background-color: rgba(52,223,186,.12);
   }
 
+  /* ── COLLAPSE ALL BUTTON ── */
+  .collapse-all-btn {
+    background: rgba(255,255,255,.08);
+    border: 1.5px solid rgba(255,255,255,.18);
+    border-radius: 8px;
+    color: rgba(255,255,255,.65);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 600;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: border-color .15s, color .15s, background .15s;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .collapse-all-btn:hover { border-color: var(--teal); color: white; background: rgba(52,223,186,.1); }
+
+  /* ── DYNAMIC STAT (filtered count) ── */
+  .stat-filtered {
+    font-size: 10px; font-weight: 600; color: var(--teal);
+    letter-spacing: .04em; opacity: 0;
+    transition: opacity .2s;
+    white-space: nowrap;
+  }
+  .stat-filtered.visible { opacity: 1; }
+
+  /* ── SCROLL TO TOP ── */
+  .scroll-top {
+    position: fixed; bottom: 28px; right: 28px;
+    width: 44px; height: 44px;
+    background: var(--dark);
+    border: 1.5px solid rgba(255,255,255,.15);
+    border-radius: 50%;
+    color: rgba(255,255,255,.7);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,.25);
+    opacity: 0; pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity .2s, transform .2s, border-color .15s, color .15s;
+    z-index: 150;
+  }
+  .scroll-top.visible { opacity: 1; pointer-events: all; transform: translateY(0); }
+  .scroll-top:hover { border-color: var(--teal); color: var(--teal); }
+
   /* ── EMPTY STATE CLEAR BUTTON ── */
   .btn-clear-filters {
     background: white; color: var(--dark);
@@ -846,7 +891,7 @@
       <div class="header-stats">
         <div class="header-stat">
           <span class="header-stat-num" id="statBacklog">—</span>
-          <span class="header-stat-label" style="color:rgba(255,255,255,.45)">Agents</span>
+          <span class="header-stat-label" style="color:rgba(255,255,255,.45)" id="statBacklogLabel">Agents</span>
         </div>
         <div class="header-stat-sep"></div>
         <div class="header-stat">
@@ -883,8 +928,13 @@
         <button class="csearch-btn" tabindex="-1">🔍</button>
       </div>
     </div>
-    <!-- Right: sort -->
-    <div class="filters-right">
+    <!-- Right: sort + collapse-all -->
+    <div class="filters-right" style="gap:8px;display:flex;align-items:center;justify-content:flex-end;">
+      <span class="stat-filtered" id="statFiltered"></span>
+      <button class="collapse-all-btn" id="collapseAllBtn" onclick="toggleCollapseAll()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span id="collapseAllLabel">Collapse all</span>
+      </button>
       <select class="sort-select" id="sortSelect" title="Sort agents">
         <option value="default">Sort: Default</option>
         <option value="name-az">Name A → Z</option>
@@ -895,6 +945,9 @@
     </div>
   </div>
 </div>
+
+<!-- SCROLL TO TOP -->
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">&#x2191;</button>
 
 <!-- MAIN -->
 <main class="main" id="catalog"></main>
@@ -1017,6 +1070,39 @@ function toggleSection(ind, headingEl, wrapEl) {
     wrapEl.classList.add('collapsed');
   }
   localStorage.setItem(COLLAPSE_KEY, JSON.stringify([...collapsedSections]));
+  updateCollapseAllLabel();
+}
+
+function toggleCollapseAll() {
+  const headings = document.querySelectorAll('.industry-heading');
+  const wraps    = document.querySelectorAll('.cards-grid-wrap');
+  const allCollapsed = [...headings].every(h => h.classList.contains('collapsed'));
+  if (allCollapsed) {
+    // Expand all
+    collapsedSections.clear();
+    headings.forEach(h => h.classList.remove('collapsed'));
+    wraps.forEach(w => w.classList.remove('collapsed'));
+  } else {
+    // Collapse all
+    headings.forEach(h => {
+      const ind = h.querySelector('.industry-heading-text').textContent;
+      collapsedSections.add(ind);
+      h.classList.add('collapsed');
+    });
+    wraps.forEach(w => w.classList.add('collapsed'));
+  }
+  localStorage.setItem(COLLAPSE_KEY, JSON.stringify([...collapsedSections]));
+  updateCollapseAllLabel();
+}
+
+function updateCollapseAllLabel() {
+  const headings = document.querySelectorAll('.industry-heading');
+  if (!headings.length) return;
+  const allCollapsed = [...headings].every(h => h.classList.contains('collapsed'));
+  const btn = document.getElementById('collapseAllLabel');
+  const chevron = document.querySelector('#collapseAllBtn svg');
+  if (btn) btn.textContent = allCollapsed ? 'Expand all' : 'Collapse all';
+  if (chevron) chevron.style.transform = allCollapsed ? 'rotate(180deg)' : '';
 }
 
 // ── URL STATE ─────────────────────────────────────────────────────────────────
@@ -1137,10 +1223,15 @@ function getFiltered() {
 function render() {
   const filtered = getFiltered();
   const catalog = document.getElementById('catalog');
-  const iterTotal = filtered.reduce((sum, a) => {
-    try { return sum + JSON.parse(a['Iterations'] || '[]').length; } catch { return sum; }
-  }, 0);
-  const total = filtered.length + iterTotal; // eslint-disable-line no-unused-vars
+
+  // Update filtered stat
+  const totalBacklog = AGENTS.filter(a => a['Status'] === 'backlog' && !isFullyClaimed(a)).length;
+  const statEl = document.getElementById('statFiltered');
+  const isFiltered = activeIndustry !== 'all' || activeTier !== 'all' || searchQ;
+  if (statEl) {
+    statEl.textContent = isFiltered ? `${filtered.length} of ${totalBacklog}` : '';
+    statEl.classList.toggle('visible', isFiltered);
+  }
 
   if (!filtered.length) {
     catalog.innerHTML = '<div class="empty-state"><div class="em">&#x1F50D;</div><p>No agents match your filters.</p><button class="btn-clear-filters" onclick="clearFilters()">Clear filters</button></div>';
@@ -1198,6 +1289,7 @@ function render() {
     wrap.appendChild(grid);
     catalog.appendChild(wrap);
   });
+  updateCollapseAllLabel();
 }
 
 // ── ITERATIONS ────────────────────────────────────────────────────────────────
@@ -1463,6 +1555,12 @@ document.getElementById('viewList').addEventListener('click', () => {
   document.getElementById('viewList').classList.add('active');
   document.getElementById('viewGrid').classList.remove('active');
 });
+
+// ── SCROLL TO TOP ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTopBtn');
+  if (btn) btn.classList.toggle('visible', window.scrollY > 400);
+}, { passive: true });
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 loadAgents();
