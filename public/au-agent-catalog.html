@@ -1005,7 +1005,18 @@
       <div class="user-greeting" id="userGreeting" style="display:none">
         <div class="user-avatar" id="userAvatar"></div>
         <span class="user-name">Hi, <strong id="userName"></strong></span>
-        <a class="logout-btn" href="/.auth/logout?post_logout_redirect_uri=/public/logged-out.html">Sign out</a>
+        <span class="user-greeting-chevron">▾</span>
+        <!-- My Claims dropdown -->
+        <div class="claims-dropdown" id="claimsDropdown">
+          <div class="claims-dropdown-header">
+            <span class="claims-dropdown-title">My Claims</span>
+            <span class="claims-count-badge" id="claimsCount">0</span>
+          </div>
+          <div class="claims-list" id="claimsList"></div>
+          <div class="claims-dropdown-footer">
+            <a href="/.auth/logout?post_logout_redirect_uri=/public/logged-out.html">Sign out</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
