@@ -1238,10 +1238,10 @@ let _claimsDropdownInitialised = false;
 
 function initClaimsDropdown() {
   if (_claimsDropdownInitialised) return;
-  _claimsDropdownInitialised = true;
   const trigger  = document.getElementById('userGreeting');
   const dropdown = document.getElementById('claimsDropdown');
   if (!trigger || !dropdown) return;
+  _claimsDropdownInitialised = true;
 
   trigger.addEventListener('click', e => {
     // Don't toggle when clicking the sign-out link inside the dropdown
