@@ -1172,9 +1172,87 @@ async function loadUser() {
     document.getElementById('userName').textContent  = firstName;
     document.getElementById('userAvatar').textContent = initials;
     document.getElementById('userGreeting').style.display = 'flex';
+    initClaimsDropdown();
   } catch { /* not on SWA or not logged in — silently skip */ }
 }
 loadUser();
+
+// ── MY CLAIMS DROPDOWN ────────────────────────────────────────────────────────
+function buildClaimsDropdown() {
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  if (!currentUserEmail) return;
+
+  const claims = [];
+
+  for (const a of AGENTS) {
+    const name = a['Agent Name'];
+
+    // Parent claim
+    if (a['ClaimedBy'] && a['ClaimedBy'].toLowerCase() === currentUserEmail.toLowerCase()) {
+      claims.push({
+        name,
+        variation: null,
+        taskId:  a['ClaimedTaskId'],
+        taskUrl: a['ClaimedTaskUrl'],
+      });
+    }
+
+    // Variation claims
+    let vars = [];
+    try { vars = JSON.parse(a['ClaimedVariations'] || '[]'); } catch {}
+    for (const v of vars) {
+      if (v.claimedBy && v.claimedBy.toLowerCase() === currentUserEmail.toLowerCase()) {
+        claims.push({
+          name,
+          variation: v.name,
+          taskId:  v.taskId,
+          taskUrl: v.taskUrl,
+        });
+      }
+    }
+  }
+
+  const list  = document.getElementById('claimsList');
+  const badge = document.getElementById('claimsCount');
+  if (!list || !badge) return;
+
+  badge.textContent = claims.length;
+
+  if (!claims.length) {
+    list.innerHTML = '<div class="claims-empty">No claims yet</div>';
+    return;
+  }
+
+  list.innerHTML = claims.map(c => `
+    <div class="claim-row">
+      <div class="claim-row-info">
+        <div class="claim-row-name">${esc(c.name)}</div>
+        ${c.variation ? `<div class="claim-row-variation">${esc(c.variation)}</div>` : ''}
+      </div>
+      ${c.taskUrl ? `<a class="claim-row-link" href="${c.taskUrl}" target="_blank" rel="noopener">#${c.taskId} ↗</a>` : ''}
+    </div>
+  `).join('');
+}
+
+function initClaimsDropdown() {
+  const trigger  = document.getElementById('userGreeting');
+  const dropdown = document.getElementById('claimsDropdown');
+  if (!trigger || !dropdown) return;
+
+  trigger.addEventListener('click', e => {
+    // Don't toggle when clicking the sign-out link inside the dropdown
+    if (e.target.closest('.claims-dropdown-footer')) return;
+    const isOpen = trigger.classList.toggle('open');
+    dropdown.classList.toggle('open', isOpen);
+  });
+
+  document.addEventListener('click', e => {
+    if (!trigger.contains(e.target)) {
+      trigger.classList.remove('open');
+      dropdown.classList.remove('open');
+    }
+  });
+}
 
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 const FUNC_BASE = 'https://agentcatalog-h0bpacatgndybfdz.australiaeast-01.azurewebsites.net/api';
@@ -1335,6 +1413,7 @@ async function loadAgents() {
     initFromURL();
     updateFilterIndicators();
     render();
+    buildClaimsDropdown();
   } catch (err) {
     console.error('Failed to load agents:', err);
     catalog.innerHTML = `
@@ -1634,6 +1713,7 @@ async function claimAgent() {
     });
     // Update local AGENTS entry
     if (a) { a['ClaimedBy'] = currentUserEmail; a['ClaimedTaskId'] = id; a['ClaimedTaskUrl'] = url; }
+    buildClaimsDropdown();
     btn.className = 'btn-claim claimed';
     btn.disabled  = true;
     btn.innerHTML = `✓ Claimed &mdash; <a href="${url}" target="_blank" style="color:inherit;text-decoration:underline">Task #${id}</a>`;
@@ -1675,6 +1755,7 @@ async function claimVariation(btn, variationName, agentId) {
       vars = vars.filter(v => v.name !== variationName);
       vars.push({ name: variationName, claimedBy: currentUserEmail, taskId: id, taskUrl: url });
       a['ClaimedVariations'] = JSON.stringify(vars);
+      buildClaimsDropdown();
     }
     btn.className = 'iter-claim-btn claimed';
     btn.disabled  = true;
