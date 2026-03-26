@@ -251,23 +251,29 @@
     transition: box-shadow .2s, transform .2s, height .3s cubic-bezier(.4,0,.2,1);
   }
   .industry-heading:hover { box-shadow: 0 6px 28px rgba(0,0,0,.2); transform: translateY(-1px); }
-  /* Dark gradient overlay */
+  /* Dark gradient overlay — lighter now that text area has its own blur */
   .industry-heading::before {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.45) 50%, rgba(0,0,0,.2) 100%);
+    background: linear-gradient(90deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.18) 50%, rgba(0,0,0,.06) 100%);
     transition: background .2s;
   }
-  .industry-heading:hover::before { background: linear-gradient(90deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.5) 50%, rgba(0,0,0,.25) 100%); }
-  /* Inner layout */
+  .industry-heading:hover::before { background: linear-gradient(90deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,.22) 50%, rgba(0,0,0,.08) 100%); }
+  /* Inner layout — left-aligned with frosted backdrop */
   .industry-heading-inner {
     position: relative; z-index: 1;
     height: 100%;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: flex-start; justify-content: center;
     flex-direction: column;
-    padding: 0 60px;
-    text-align: center;
+    padding: 0 60px 0 32px;
+    text-align: left;
     gap: 8px;
+    width: 65%;
+    background: linear-gradient(90deg, rgba(0,0,0,.38) 0%, rgba(0,0,0,.28) 55%, rgba(0,0,0,0) 100%);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 60%, transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0%, #000 60%, transparent 100%);
   }
   .industry-heading-text {
     font-family: 'DM Serif Display', serif;
@@ -276,7 +282,7 @@
     text-shadow: 0 2px 12px rgba(0,0,0,.35);
   }
   .industry-heading-meta {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
+    display: flex; align-items: center; justify-content: flex-start; gap: 10px;
   }
   .industry-count {
     font-size: 11px; font-weight: 700; letter-spacing: .1em;
