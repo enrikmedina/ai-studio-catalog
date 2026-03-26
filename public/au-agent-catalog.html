@@ -1229,12 +1229,16 @@ function buildClaimsDropdown() {
         <div class="claim-row-name">${esc(c.name)}</div>
         ${c.variation ? `<div class="claim-row-variation">${esc(c.variation)}</div>` : ''}
       </div>
-      ${c.taskUrl ? `<a class="claim-row-link" href="${c.taskUrl}" target="_blank" rel="noopener">#${c.taskId} ↗</a>` : ''}
+      ${c.taskUrl ? `<a class="claim-row-link" href="${esc(c.taskUrl)}" target="_blank" rel="noopener">#${c.taskId} ↗</a>` : ''}
     </div>
   `).join('');
 }
 
+let _claimsDropdownInitialised = false;
+
 function initClaimsDropdown() {
+  if (_claimsDropdownInitialised) return;
+  _claimsDropdownInitialised = true;
   const trigger  = document.getElementById('userGreeting');
   const dropdown = document.getElementById('claimsDropdown');
   if (!trigger || !dropdown) return;
