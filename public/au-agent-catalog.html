@@ -1409,9 +1409,13 @@ async function loadAgents() {
     }));
 
     const backlogAgents = AGENTS.filter(a => a['Status'] === 'backlog');
-    document.getElementById('statBacklog').textContent = backlogAgents.length;
+    document.getElementById('statBacklog').textContent = backlogAgents.filter(a => !a['ClaimedBy']).length;
     const totalVariations = backlogAgents.reduce((sum, a) => {
-      try { return sum + JSON.parse(a['Iterations'] || '[]').length; } catch { return sum; }
+      try {
+        const iters = JSON.parse(a['Iterations'] || '[]').length;
+        const claimed = JSON.parse(a['ClaimedVariations'] || '[]').length;
+        return sum + Math.max(0, iters - claimed);
+      } catch { return sum; }
     }, 0);
     document.getElementById('statVariations').textContent = totalVariations;
     initFromURL();
