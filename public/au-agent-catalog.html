@@ -1411,6 +1411,7 @@ async function loadAgents() {
     const backlogAgents = AGENTS.filter(a => a['Status'] === 'backlog');
     document.getElementById('statBacklog').textContent = backlogAgents.filter(a => !a['ClaimedBy']).length;
     const totalVariations = backlogAgents.reduce((sum, a) => {
+      if (a['ClaimedBy']) return sum; // skip wholly-claimed agents
       try {
         const iters = JSON.parse(a['Iterations'] || '[]').length;
         const claimed = JSON.parse(a['ClaimedVariations'] || '[]').length;
