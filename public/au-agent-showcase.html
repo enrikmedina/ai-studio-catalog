@@ -262,18 +262,35 @@
       transform: translateY(-3px);
     }
 
-    .card-photo {
-      height: 110px; position: relative;
-      background-size: cover; background-position: center;
+    .card-header {
+      height: 88px; position: relative; overflow: hidden;
+      border-radius: 12px 12px 0 0;
+      flex-shrink: 0;
     }
-    .card-photo-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to bottom, transparent 35%, rgba(15,15,26,.72));
+    .card-header-noise {
+      position: absolute; inset: 0; opacity: .06;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 160px;
     }
-    .card-industry {
-      position: absolute; bottom: 9px; left: 13px;
-      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
-      color: rgba(255,255,255,.65);
+    .card-header-badges {
+      position: absolute; top: 12px; left: 14px; right: 14px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-industry-pill {
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em;
+      color: rgba(255,255,255,.55);
+      background: rgba(255,255,255,.1); border-radius: 100px;
+      padding: 3px 8px;
+    }
+    .card-demo-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--teal);
+      background: rgba(52,223,186,.12); border-radius: 100px;
+      padding: 3px 8px;
+    }
+    .card-demo-pill-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--teal);
     }
 
     .card-body { padding: 15px 17px 17px; }
@@ -316,37 +333,6 @@
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
     .skeleton-card { height: 200px; border-radius: 12px; }
 
-    /* ── DEMO THUMBNAIL ─────────────────────────────────────────────────────── */
-    .card-demo-thumb {
-      height: 140px; position: relative; overflow: hidden;
-      background: var(--dark-mid); cursor: pointer;
-    }
-    .demo-iframe-wrap {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      pointer-events: none;
-    }
-    .demo-iframe-wrap iframe {
-      width: 1280px; height: 720px;
-      transform: scale(0.21); transform-origin: top left;
-      border: none;
-      position: absolute; top: 0; left: 0;
-    }
-    .demo-thumb-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to bottom, transparent 30%, rgba(15,15,26,.85));
-    }
-    .demo-play-btn {
-      position: absolute; bottom: 10px; left: 13px;
-      display: inline-flex; align-items: center; gap: 7px;
-      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
-      color: var(--teal); z-index: 2;
-    }
-    .demo-play-icon {
-      width: 22px; height: 22px; border-radius: 50%;
-      background: var(--teal); display: flex; align-items: center; justify-content: center;
-    }
-    .demo-play-icon svg { width: 9px; height: 9px; fill: var(--dark); margin-left: 1px; }
 
     /* ── MODAL ──────────────────────────────────────────────────────────────── */
     .modal-backdrop {
@@ -522,21 +508,30 @@ const SHOWCASE_CONFIG = {
   ]
 };
 
-const INDUSTRY_META = {
-  'Financial Services':           { photo: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=900&q=75&auto=format&fit=crop' },
-  'Property & Real Estate':       { photo: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=900&q=75&auto=format&fit=crop' },
-  'Healthcare & Aged Care':       { photo: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=900&q=75&auto=format&fit=crop' },
-  'Legal & Professional Services':{ photo: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=900&q=75&auto=format&fit=crop' },
-  'Education':                    { photo: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=900&q=75&auto=format&fit=crop' },
-  'Retail & eCommerce':           { photo: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=900&q=75&auto=format&fit=crop' },
-  'Government & Local Council':   { photo: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=900&q=75&auto=format&fit=crop' },
-  'Construction & Trades':        { photo: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=75&auto=format&fit=crop' },
-  'Agriculture & Agribusiness':   { photo: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=900&q=75&auto=format&fit=crop' },
-  'HR & Workforce':               { photo: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=900&q=75&auto=format&fit=crop' },
-};
-
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const photo = ind => (INDUSTRY_META[ind] || {}).photo || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=900&q=75&auto=format&fit=crop';
+
+// Gradient palette — curated brand-consistent pairs [from, to, angle]
+const GRADIENTS = [
+  ['#0a2e24', '#0d6e50'],  // deep forest
+  ['#0f0f2e', '#2a1f6e'],  // midnight indigo
+  ['#2e1a0a', '#7a3f10'],  // dark amber
+  ['#0a1929', '#0d4a8f'],  // deep navy
+  ['#1f0a1a', '#6e1f52'],  // dark plum
+  ['#0a1f0a', '#1a5c2a'],  // dark pine
+  ['#1a1400', '#5c4a00'],  // dark gold
+  ['#1a0a0a', '#6e1a1a'],  // dark crimson
+];
+
+function nameHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h % GRADIENTS.length;
+}
+
+function cardGradient(name) {
+  const [a, b] = GRADIENTS[nameHash(name)];
+  return `linear-gradient(135deg, ${a} 0%, ${b} 100%)`;
+}
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let ALL_AGENTS   = [];
@@ -581,26 +576,14 @@ function closeModalOnBackdrop(e) {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
-function demoThumb(storylaneUrl, ind) {
-  if (storylaneUrl) {
-    return `
-      <div class="card-demo-thumb">
-        <div class="demo-iframe-wrap">
-          <iframe src="${esc(storylaneUrl)}" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
-        </div>
-        <div class="demo-thumb-overlay"></div>
-        <div class="demo-play-btn">
-          <span class="demo-play-icon">
-            <svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg>
-          </span>
-          View Demo
-        </div>
-      </div>`;
-  }
+function cardHeader(name, ind, storylaneUrl) {
   return `
-    <div class="card-photo" style="background-image:url('${esc(photo(ind))}')">
-      <div class="card-photo-overlay"></div>
-      <span class="card-industry">${esc(ind)}</span>
+    <div class="card-header" style="background:${cardGradient(name)}">
+      <div class="card-header-noise"></div>
+      <div class="card-header-badges">
+        ${ind ? `<span class="card-industry-pill">${esc(ind)}</span>` : '<span></span>'}
+        ${storylaneUrl ? `<span class="card-demo-pill"><span class="card-demo-pill-dot"></span>Demo</span>` : ''}
+      </div>
     </div>`;
 }
 
@@ -625,10 +608,11 @@ function renderFeatured(agents) {
     const sl      = a['Storylane'] || '';
     const idx     = agents.indexOf(a);
     return `
-      <div class="feat-card ${isLarge ? 'large' : 'small'}" onclick="openModal(${idx})">
-        <div class="feat-photo" style="background-image:url('${esc(photo(ind))}')"></div>
+      <div class="feat-card ${isLarge ? 'large' : 'small'}" onclick="openModal(${idx})"
+           style="background:${cardGradient(name)}">
+        <div class="hero-noise"></div>
         <div class="feat-overlay"></div>
-        ${sl ? `<div class="demo-play-btn" style="top:14px;bottom:auto;left:14px;z-index:3"><span class="demo-play-icon"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></span> Demo</div>` : ''}
+        ${sl ? `<div style="position:absolute;top:14px;right:14px;z-index:3;display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);background:rgba(52,223,186,.12);border-radius:100px;padding:3px 9px"><span style="width:5px;height:5px;border-radius:50%;background:var(--teal);display:inline-block"></span>Demo</div>` : ''}
         <span class="feat-industry">${esc(ind)}</span>
         <div class="feat-body">
           <div class="feat-name">${esc(name)}</div>
@@ -674,8 +658,7 @@ function renderGrid() {
     const sl   = a['Storylane']  || '';
     return `
       <div class="agent-card" style="animation: fadeUp .4s ${(i % 12) * 0.04}s ease both" onclick="openModal(${idx})">
-        ${demoThumb(sl, ind)}
-        ${!sl ? '' : `<div class="card-industry" style="position:static;padding:6px 13px 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">${esc(ind)}</div>`}
+        ${cardHeader(name, ind, sl)}
         <div class="card-body">
           <div class="card-name">${esc(name)}</div>
           <div class="card-desc">${esc(desc)}</div>
