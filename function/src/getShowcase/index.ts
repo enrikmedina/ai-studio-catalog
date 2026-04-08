@@ -17,7 +17,7 @@ interface AdoFields {
   "System.Description"?: string;
   "System.AssignedTo"?: { displayName: string };
   "System.Tags"?: string;
-  "Custom.StorylanLink"?: string;
+  "Custom.StorylaneLink"?: string;
 }
 
 async function getClosedUserStories(pat: string): Promise<object[]> {
@@ -55,7 +55,7 @@ async function getClosedUserStories(pat: string): Promise<object[]> {
     "System.Description",
     "System.AssignedTo",
     "System.Tags",
-    "Custom.StorylanLink",
+    "Custom.StorylaneLink",
   ].join(",");
 
   const batches: number[][] = [];
@@ -75,7 +75,7 @@ async function getClosedUserStories(pat: string): Promise<object[]> {
         description:  f["System.Description"] ?? "",
         assignedTo:   f["System.AssignedTo"]?.displayName ?? "",
         tags:         f["System.Tags"] ?? "",
-        storylaneUrl: f["Custom.StorylanLink"] ?? "",
+        storylaneUrl: f["Custom.StorylaneLink"] ?? "",
         status:       "available",
       });
     }
