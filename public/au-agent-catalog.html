@@ -218,6 +218,14 @@
     font-weight: 600;
   }
   .claim-row-link:hover { text-decoration: underline; }
+  .claim-row-claimant {
+    font-size: 10px;
+    color: var(--teal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: .8;
+  }
   .claims-dropdown-footer {
     border-top: 1px solid var(--border);
     padding: 8px 14px;
@@ -1013,6 +1021,13 @@
             <span class="claims-count-badge" id="claimsCount">0</span>
           </div>
           <div class="claims-list" id="claimsList"></div>
+          <div id="allClaimsSection" style="display:none">
+            <div class="claims-dropdown-header">
+              <span class="claims-dropdown-title">All Claims</span>
+              <span class="claims-count-badge" id="allClaimsCount">0</span>
+            </div>
+            <div class="claims-list" id="allClaimsList"></div>
+          </div>
           <div class="claims-dropdown-footer">
             <a href="/.auth/logout?post_logout_redirect_uri=/public/logged-out.html">Sign out</a>
           </div>
@@ -1232,6 +1247,41 @@ function buildClaimsDropdown() {
       ${c.taskUrl ? `<a class="claim-row-link" href="${esc(c.taskUrl)}" target="_blank" rel="noopener">#${c.taskId} ↗</a>` : ''}
     </div>
   `).join('');
+
+  // ── ADMIN: All Claims (enrik@mysmb.com only) ──────────────────────────────
+  const allSection = document.getElementById('allClaimsSection');
+  const allList    = document.getElementById('allClaimsList');
+  const allBadge   = document.getElementById('allClaimsCount');
+  if (!allSection || !allList || !allBadge) return;
+
+  if (currentUserEmail.toLowerCase() !== 'enrik@mysmb.com') return;
+
+  const allClaims = [];
+  for (const a of AGENTS) {
+    const name = a['Agent Name'];
+    if (a['ClaimedBy']) {
+      allClaims.push({ name, variation: null, claimedBy: a['ClaimedBy'], taskId: a['ClaimedTaskId'], taskUrl: a['ClaimedTaskUrl'] });
+    }
+    let vars = []; try { vars = JSON.parse(a['ClaimedVariations'] || '[]'); } catch {}
+    for (const v of vars) {
+      if (v.claimedBy) allClaims.push({ name, variation: v.name, claimedBy: v.claimedBy, taskId: v.taskId, taskUrl: v.taskUrl });
+    }
+  }
+
+  allSection.style.display = 'block';
+  allBadge.textContent = allClaims.length;
+  allList.innerHTML = allClaims.length
+    ? allClaims.map(c => `
+        <div class="claim-row">
+          <div class="claim-row-info">
+            <div class="claim-row-name">${esc(c.name)}</div>
+            ${c.variation ? `<div class="claim-row-variation">${esc(c.variation)}</div>` : ''}
+            <div class="claim-row-claimant">${esc(c.claimedBy)}</div>
+          </div>
+          ${c.taskUrl ? `<a class="claim-row-link" href="${esc(c.taskUrl)}" target="_blank" rel="noopener">#${c.taskId} ↗</a>` : ''}
+        </div>
+      `).join('')
+    : '<div class="claims-empty">No claims yet</div>';
 }
 
 let _claimsDropdownInitialised = false;
@@ -1411,7 +1461,6 @@ async function loadAgents() {
     const backlogAgents = AGENTS.filter(a => a['Status'] === 'backlog');
     document.getElementById('statBacklog').textContent = backlogAgents.filter(a => !a['ClaimedBy']).length;
     const totalVariations = backlogAgents.reduce((sum, a) => {
-      if (a['ClaimedBy']) return sum; // skip wholly-claimed agents
       try {
         const iters = JSON.parse(a['Iterations'] || '[]').length;
         const claimed = JSON.parse(a['ClaimedVariations'] || '[]').length;
