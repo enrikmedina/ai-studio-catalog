@@ -66,6 +66,26 @@
   /* Logo */
   .header-logo { flex-shrink: 0; display: flex; align-items: center; }
 
+  /* View switcher */
+  .view-switcher {
+    display: flex; align-items: center;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px; padding: 3px; gap: 2px;
+    flex-shrink: 0;
+  }
+  .view-switcher a {
+    padding: 5px 14px; border-radius: 5px;
+    font-size: 12px; font-weight: 600;
+    text-decoration: none; white-space: nowrap;
+    transition: background .15s, color .15s;
+    color: rgba(255,255,255,.5);
+  }
+  .view-switcher a.active {
+    background: rgba(255,255,255,.12); color: #fff;
+  }
+  .view-switcher a:not(.active):hover { color: rgba(255,255,255,.8); }
+
   /* Right side */
   .header-right {
     margin-left: auto;
@@ -1036,6 +1056,12 @@
     <!-- Logo -->
     <div class="header-logo">
       <img src="mySMBcom_Logo+with+tagline_Black_Transparent@2x.png.webp" alt="mySMB.com" style="height:48px;width:auto;display:block">
+    </div>
+
+    <!-- View switcher -->
+    <div class="view-switcher">
+      <a href="/public/au-agent-catalog.html" class="active">Backlog</a>
+      <a href="/public/au-agent-showcase.html">Showcase</a>
     </div>
 
     <!-- Right: user greeting only -->
