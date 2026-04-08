@@ -218,14 +218,44 @@
     font-weight: 600;
   }
   .claim-row-link:hover { text-decoration: underline; }
-  .claim-row-claimant {
-    font-size: 10px;
-    color: var(--teal);
+  .claimant-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 14px;
+    cursor: pointer;
+    user-select: none;
+    gap: 8px;
+  }
+  .claimant-header:hover { background: rgba(0,0,0,.04); }
+  .claimant-header-left { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
+  .claimant-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    opacity: .8;
   }
+  .claimant-count {
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--teal);
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 6px;
+    flex-shrink: 0;
+  }
+  .claimant-chevron {
+    font-size: 9px;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: transform .15s;
+  }
+  .claimant-header.open .claimant-chevron { transform: rotate(180deg); }
+  .claimant-items { display: none; }
+  .claimant-items.open { display: block; }
+  .claimant-items .claim-row { padding-left: 24px; }
   .claims-dropdown-footer {
     border-top: 1px solid var(--border);
     padding: 8px 14px;
@@ -1255,32 +1285,58 @@ function buildClaimsDropdown() {
 
   if (currentUserEmail.toLowerCase() !== 'enrik@mysmb.com') return;
 
-  const allClaims = [];
+  // Group all claims by claimant
+  const byClaimant = new Map();
   for (const a of AGENTS) {
     const name = a['Agent Name'];
     if (a['ClaimedBy']) {
-      allClaims.push({ name, variation: null, claimedBy: a['ClaimedBy'], taskId: a['ClaimedTaskId'], taskUrl: a['ClaimedTaskUrl'] });
+      const key = a['ClaimedBy'].toLowerCase();
+      if (!byClaimant.has(key)) byClaimant.set(key, { email: a['ClaimedBy'], items: [] });
+      byClaimant.get(key).items.push({ name, variation: null, taskId: a['ClaimedTaskId'], taskUrl: a['ClaimedTaskUrl'] });
     }
     let vars = []; try { vars = JSON.parse(a['ClaimedVariations'] || '[]'); } catch {}
     for (const v of vars) {
-      if (v.claimedBy) allClaims.push({ name, variation: v.name, claimedBy: v.claimedBy, taskId: v.taskId, taskUrl: v.taskUrl });
+      if (v.claimedBy) {
+        const key = v.claimedBy.toLowerCase();
+        if (!byClaimant.has(key)) byClaimant.set(key, { email: v.claimedBy, items: [] });
+        byClaimant.get(key).items.push({ name, variation: v.name, taskId: v.taskId, taskUrl: v.taskUrl });
+      }
     }
   }
 
+  const totalAll = [...byClaimant.values()].reduce((s, g) => s + g.items.length, 0);
   allSection.style.display = 'block';
-  allBadge.textContent = allClaims.length;
-  allList.innerHTML = allClaims.length
-    ? allClaims.map(c => `
+  allBadge.textContent = totalAll;
+
+  if (!totalAll) {
+    allList.innerHTML = '<div class="claims-empty">No claims yet</div>';
+  } else {
+    const displayName = email => {
+      const local = email.split('@')[0];
+      return local.charAt(0).toUpperCase() + local.slice(1);
+    };
+    let idx = 0;
+    allList.innerHTML = [...byClaimant.values()].map(g => {
+      const groupId = `cg-${idx++}`;
+      const rows = g.items.map(c => `
         <div class="claim-row">
           <div class="claim-row-info">
             <div class="claim-row-name">${esc(c.name)}</div>
             ${c.variation ? `<div class="claim-row-variation">${esc(c.variation)}</div>` : ''}
-            <div class="claim-row-claimant">${esc(c.claimedBy)}</div>
           </div>
           ${c.taskUrl ? `<a class="claim-row-link" href="${esc(c.taskUrl)}" target="_blank" rel="noopener">#${c.taskId} ↗</a>` : ''}
+        </div>`).join('');
+      return `
+        <div class="claimant-header" onclick="this.classList.toggle('open');document.getElementById('${groupId}').classList.toggle('open')">
+          <div class="claimant-header-left">
+            <span class="claimant-name">${esc(displayName(g.email))}</span>
+            <span class="claimant-count">${g.items.length}</span>
+          </div>
+          <span class="claimant-chevron">▾</span>
         </div>
-      `).join('')
-    : '<div class="claims-empty">No claims yet</div>';
+        <div class="claimant-items" id="${groupId}">${rows}</div>`;
+    }).join('');
+  }
 }
 
 let _claimsDropdownInitialised = false;
