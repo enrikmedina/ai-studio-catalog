@@ -37,13 +37,7 @@ function adoHeaders(pat: string) {
   };
 }
 
-/** Extract the agent name from a claim task title like "[Claim] Agent Name – Variation" */
-function agentNameFromTitle(title: string): string | null {
-  const match = title.match(/^\[Claim\]\s+(.+?)(?:\s+[-–]\s+.+)?$/);
-  return match ? match[1].trim() : null;
-}
-
-/** Query ADO for Done tasks tagged with "AI Studio" and return unique agent names */
+/** Query ADO for Done User Stories tagged with "AI Studio" and return unique agent names */
 async function getDoneAgentNames(pat: string): Promise<Set<string>> {
   const wiqlUrl = `${ADO_BASE}/wit/wiql?api-version=7.1`;
   const wiql = {
@@ -51,7 +45,7 @@ async function getDoneAgentNames(pat: string): Promise<Set<string>> {
       SELECT [System.Id], [System.Title]
       FROM WorkItems
       WHERE [System.TeamProject] = 'AI Studio'
-        AND [System.WorkItemType] = 'Task'
+        AND [System.WorkItemType] = 'User Story'
         AND [System.Tags] CONTAINS 'AI Studio'
         AND [System.State] = 'Done'
       ORDER BY [System.ChangedDate] DESC
@@ -86,8 +80,8 @@ async function getDoneAgentNames(pat: string): Promise<Set<string>> {
     if (!detailRes.ok) continue;
     const detail = (await detailRes.json()) as { value: { fields: { "System.Title": string } }[] };
     for (const item of detail.value) {
-      const name = agentNameFromTitle(item.fields["System.Title"] || "");
-      if (name) names.add(name.toLowerCase());
+      const title = (item.fields["System.Title"] || "").trim();
+      if (title) names.add(title.toLowerCase());
     }
   }
 
