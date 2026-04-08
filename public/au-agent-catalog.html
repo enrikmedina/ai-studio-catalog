@@ -1313,7 +1313,7 @@ function buildClaimsDropdown() {
   } else {
     const displayName = email => {
       const local = email.split('@')[0];
-      return local.charAt(0).toUpperCase() + local.slice(1);
+      return local.split('.').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     };
     let idx = 0;
     allList.innerHTML = [...byClaimant.values()].map(g => {
@@ -1349,8 +1349,9 @@ function initClaimsDropdown() {
   _claimsDropdownInitialised = true;
 
   trigger.addEventListener('click', e => {
-    // Don't toggle when clicking the sign-out link inside the dropdown
+    // Don't toggle when clicking inside the dropdown content
     if (e.target.closest('.claims-dropdown-footer')) return;
+    if (e.target.closest('.claims-dropdown')) return;
     const isOpen = trigger.classList.toggle('open');
     dropdown.classList.toggle('open', isOpen);
   });
