@@ -511,6 +511,40 @@ function setFilter(ind, btn) {
   renderGrid();
 }
 
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function stripHtml(html) {
+  if (!html) return '';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function extractPurpose(html) {
+  if (!html) return '';
+  const plain = stripHtml(html);
+  // Try to pull the sentence(s) after "Agent's Purpose:" heading
+  const match = plain.match(/Agent['']s Purpose[:\s]+([\s\S]{20,400}?)(?=Tech Stack|Personas|$)/i);
+  if (match) return match[1].trim().replace(/\s+/g, ' ');
+  // Fallback: first 280 chars of plain text
+  return plain.replace(/\s+/g, ' ').trim().slice(0, 280);
+}
+
+function industryFromTags(tags) {
+  if (!tags) return '';
+  const map = {
+    healthcare: 'Healthcare', 'aged-care': 'Aged Care', legal: 'Legal',
+    finance: 'Finance', accounting: 'Finance', tax: 'Finance',
+    manufacturing: 'Manufacturing', retail: 'Retail', logistics: 'Logistics',
+    hr: 'HR', recruitment: 'HR', 'real-estate': 'Real Estate',
+    construction: 'Construction', education: 'Education',
+  };
+  const lower = tags.toLowerCase();
+  for (const [key, label] of Object.entries(map)) {
+    if (lower.includes(key)) return label;
+  }
+  return '';
+}
+
 // ── LOAD ──────────────────────────────────────────────────────────────────────
 async function load() {
   try {
@@ -519,9 +553,9 @@ async function load() {
     const data = await res.json();
 
     ALL_AGENTS = data.map(a => ({
-      'Agent Name':  a.name        || '',
-      'Industry':    a.industry    || '',
-      'Description': a.description || '',
+      'Agent Name':  a.name || '',
+      'Industry':    industryFromTags(a.tags),
+      'Description': extractPurpose(a.description),
     }));
 
     // Stats
