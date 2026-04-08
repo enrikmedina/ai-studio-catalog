@@ -394,7 +394,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-const API_URL = 'https://agentcatalog-h0bpacatgndybfdz.australiaeast-01.azurewebsites.net/api/agents';
+const API_URL = 'https://agentcatalog-h0bpacatgndybfdz.australiaeast-01.azurewebsites.net/api/showcase';
 
 const SHOWCASE_CONFIG = {
   featured: [
@@ -518,14 +518,11 @@ async function load() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
-    ALL_AGENTS = data
-      .map(a => ({
-        'Agent Name':  a.title || a['Agent Name'] || '',
-        'Industry':    a.industry || a['Industry'] || '',
-        'Description': a.description || a['Description'] || '',
-        'Status':      a.status || a['Status'] || '',
-      }))
-      .filter(a => a['Status'] === 'available');
+    ALL_AGENTS = data.map(a => ({
+      'Agent Name':  a.name        || '',
+      'Industry':    a.industry    || '',
+      'Description': a.description || '',
+    }));
 
     // Stats
     const industries = new Set(ALL_AGENTS.map(a => a['Industry']).filter(Boolean));
