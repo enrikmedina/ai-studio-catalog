@@ -46,7 +46,7 @@ async function getDoneAgentNames(pat: string): Promise<Set<string>> {
       FROM WorkItems
       WHERE [System.TeamProject] = 'AI Studio'
         AND [System.WorkItemType] = 'User Story'
-        AND [System.State] = 'Done'
+        AND [System.State] = 'Closed'
       ORDER BY [System.ChangedDate] DESC
     `,
   };
