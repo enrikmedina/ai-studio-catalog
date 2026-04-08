@@ -45,4 +45,5 @@ jobs:
             --name ${{ secrets.AZURE_FUNCTIONAPP_NAME }} \
             --src-path function.zip \
             --type zip \
-            --clean true
+            --clean true \
+            --async true
