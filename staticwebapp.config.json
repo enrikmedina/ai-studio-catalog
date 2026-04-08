@@ -9,6 +9,10 @@
       "allowedRoles": ["anonymous", "authenticated"]
     },
     {
+      "route": "/public/au-agent-showcase.html",
+      "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
       "route": "/*",
       "allowedRoles": ["authenticated"]
     }
