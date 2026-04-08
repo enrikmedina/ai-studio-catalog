@@ -1235,7 +1235,6 @@ function buildClaimsDropdown() {
 
   if (!claims.length) {
     list.innerHTML = '<div class="claims-empty">No claims yet</div>';
-    return;
   }
 
   list.innerHTML = claims.map(c => `
