@@ -17,6 +17,8 @@ interface AdoFields {
   "System.Description"?: string;
   "System.AssignedTo"?: { displayName: string };
   "System.Tags"?: string;
+  // Custom field — update this name if your ADO process uses a different internal name
+  "Custom.StorylanURL"?: string;
 }
 
 async function getClosedUserStories(pat: string): Promise<object[]> {
@@ -54,6 +56,7 @@ async function getClosedUserStories(pat: string): Promise<object[]> {
     "System.Description",
     "System.AssignedTo",
     "System.Tags",
+    "Custom.StorylanURL",
   ].join(",");
 
   const batches: number[][] = [];
@@ -68,12 +71,13 @@ async function getClosedUserStories(pat: string): Promise<object[]> {
     for (const item of detail.value) {
       const f = item.fields;
       results.push({
-        id:          item.id,
-        name:        f["System.Title"] ?? "",
-        description: f["System.Description"] ?? "",
-        assignedTo:  f["System.AssignedTo"]?.displayName ?? "",
-        tags:        f["System.Tags"] ?? "",
-        status:      "available",
+        id:           item.id,
+        name:         f["System.Title"] ?? "",
+        description:  f["System.Description"] ?? "",
+        assignedTo:   f["System.AssignedTo"]?.displayName ?? "",
+        tags:         f["System.Tags"] ?? "",
+        storylaneUrl: f["Custom.StorylanURL"] ?? "",
+        status:       "available",
       });
     }
   }

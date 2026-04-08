@@ -316,6 +316,110 @@
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
     .skeleton-card { height: 200px; border-radius: 12px; }
 
+    /* ── DEMO THUMBNAIL ─────────────────────────────────────────────────────── */
+    .card-demo-thumb {
+      height: 140px; position: relative; overflow: hidden;
+      background: var(--dark-mid); cursor: pointer;
+    }
+    .demo-iframe-wrap {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    .demo-iframe-wrap iframe {
+      width: 1280px; height: 720px;
+      transform: scale(0.21); transform-origin: top left;
+      border: none;
+      position: absolute; top: 0; left: 0;
+    }
+    .demo-thumb-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 30%, rgba(15,15,26,.85));
+    }
+    .demo-play-btn {
+      position: absolute; bottom: 10px; left: 13px;
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--teal); z-index: 2;
+    }
+    .demo-play-icon {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--teal); display: flex; align-items: center; justify-content: center;
+    }
+    .demo-play-icon svg { width: 9px; height: 9px; fill: var(--dark); margin-left: 1px; }
+
+    /* ── MODAL ──────────────────────────────────────────────────────────────── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(10,10,20,.78); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: #fff; border-radius: 18px;
+      width: 100%; max-width: 860px; max-height: 90vh;
+      overflow-y: auto; position: relative;
+      animation: modalIn .22s ease both;
+    }
+    @keyframes modalIn { from { opacity:0; transform: scale(.97) translateY(12px); } }
+
+    .modal-close {
+      position: sticky; top: 16px; float: right; margin: 16px 16px 0 0;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(0,0,0,.07); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: var(--ink); line-height: 1;
+      transition: background .15s;
+      z-index: 10;
+    }
+    .modal-close:hover { background: rgba(0,0,0,.13); }
+
+    .modal-embed {
+      width: 100%; aspect-ratio: 16/9; background: var(--dark);
+      border-radius: 14px 14px 0 0; overflow: hidden; position: relative;
+    }
+    .modal-embed iframe {
+      width: 100%; height: 100%; border: none; display: block;
+    }
+    .modal-embed-placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.2); font-size: 13px;
+    }
+
+    .modal-body { padding: 28px 32px 36px; }
+    .modal-industry {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--teal); margin-bottom: 10px;
+    }
+    .modal-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px; color: var(--ink); line-height: 1.15; margin-bottom: 16px;
+    }
+    .modal-desc {
+      font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 24px;
+    }
+    .modal-meta {
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+    .modal-meta-item {
+      font-size: 12px; color: var(--muted);
+    }
+    .modal-meta-item strong { color: var(--ink); font-weight: 600; }
+    .modal-open-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 20px; border-radius: 8px;
+      background: var(--dark); color: #fff;
+      font-size: 12px; font-weight: 600; text-decoration: none;
+      transition: opacity .15s; margin-top: 20px;
+    }
+    .modal-open-btn:hover { opacity: .85; }
+
+    /* ── AGENT CARD click cursor ─────────────────────────────────────────────── */
+    .agent-card { cursor: pointer; }
+    .feat-card  { cursor: pointer; }
+
     /* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
     @media (max-width: 900px) {
       .nav { padding: 0 20px; }
@@ -392,6 +496,20 @@
   </div>
 </section>
 
+<!-- MODAL -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModalOnBackdrop(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-embed" id="modalEmbed"></div>
+    <div class="modal-body">
+      <div class="modal-industry" id="modalIndustry"></div>
+      <div class="modal-name"    id="modalName"></div>
+      <div class="modal-desc"    id="modalDesc"></div>
+      <div class="modal-meta"    id="modalMeta"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const API_URL = 'https://agentcatalog-h0bpacatgndybfdz.australiaeast-01.azurewebsites.net/api/showcase';
@@ -424,7 +542,68 @@ const photo = ind => (INDUSTRY_META[ind] || {}).photo || 'https://images.unsplas
 let ALL_AGENTS   = [];
 let activeFilter = 'all';
 
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(idx) {
+  const a    = ALL_AGENTS[idx];
+  const embed = document.getElementById('modalEmbed');
+  const url   = a['Storylane'];
+
+  if (url) {
+    embed.innerHTML = `<iframe src="${esc(url)}" allowfullscreen allow="fullscreen"></iframe>`;
+  } else {
+    embed.innerHTML = `<div class="modal-embed-placeholder">No demo available yet</div>`;
+  }
+
+  document.getElementById('modalIndustry').textContent = a['Industry'] || '';
+  document.getElementById('modalName').textContent     = a['Agent Name'] || '';
+  document.getElementById('modalDesc').textContent     = a['Description'] || '';
+
+  const meta = document.getElementById('modalMeta');
+  const parts = [];
+  if (a['AssignedTo']) parts.push(`<span class="modal-meta-item"><strong>Built by</strong> ${esc(a['AssignedTo'])}</span>`);
+  if (url) parts.push(`<a class="modal-open-btn" href="${esc(url)}" target="_blank" rel="noopener">↗ Open full demo</a>`);
+  meta.innerHTML = parts.join('');
+
+  document.getElementById('modalBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.getElementById('modalEmbed').innerHTML = ''; // stop iframe
+  document.body.style.overflow = '';
+}
+
+function closeModalOnBackdrop(e) {
+  if (e.target === document.getElementById('modalBackdrop')) closeModal();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
 // ── RENDER ────────────────────────────────────────────────────────────────────
+function demoThumb(storylaneUrl, ind) {
+  if (storylaneUrl) {
+    return `
+      <div class="card-demo-thumb">
+        <div class="demo-iframe-wrap">
+          <iframe src="${esc(storylaneUrl)}" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+        </div>
+        <div class="demo-thumb-overlay"></div>
+        <div class="demo-play-btn">
+          <span class="demo-play-icon">
+            <svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg>
+          </span>
+          View Demo
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="card-photo" style="background-image:url('${esc(photo(ind))}')">
+      <div class="card-photo-overlay"></div>
+      <span class="card-industry">${esc(ind)}</span>
+    </div>`;
+}
+
 function renderFeatured(agents) {
   const featuredNames = new Set(SHOWCASE_CONFIG.featured.map(n => n.toLowerCase()));
   const featured = SHOWCASE_CONFIG.featured
@@ -443,10 +622,13 @@ function renderFeatured(agents) {
     const name    = a['Agent Name'];
     const ind     = a['Industry'] || '';
     const desc    = a['Description'] || '';
+    const sl      = a['Storylane'] || '';
+    const idx     = agents.indexOf(a);
     return `
-      <div class="feat-card ${isLarge ? 'large' : 'small'}">
+      <div class="feat-card ${isLarge ? 'large' : 'small'}" onclick="openModal(${idx})">
         <div class="feat-photo" style="background-image:url('${esc(photo(ind))}')"></div>
         <div class="feat-overlay"></div>
+        ${sl ? `<div class="demo-play-btn" style="top:14px;bottom:auto;left:14px;z-index:3"><span class="demo-play-icon"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></span> Demo</div>` : ''}
         <span class="feat-industry">${esc(ind)}</span>
         <div class="feat-body">
           <div class="feat-name">${esc(name)}</div>
@@ -454,13 +636,12 @@ function renderFeatured(agents) {
         </div>
       </div>`;
   }).join('');
-
-  return featuredNames;
 }
 
 function renderFilters(agents) {
   const bar = document.getElementById('filterBar');
   const industries = [...new Set(agents.map(a => a['Industry']).filter(Boolean))].sort();
+  if (!industries.length) return;
   bar.style.display = 'flex';
   bar.innerHTML = `<button class="filter-pill active" data-ind="all" onclick="setFilter('all',this)">All industries</button>` +
     industries.map(ind => `<button class="filter-pill" data-ind="${esc(ind)}" onclick="setFilter('${esc(ind)}',this)">${esc(ind)}</button>`).join('');
@@ -468,11 +649,13 @@ function renderFilters(agents) {
 
 function renderGrid() {
   const featuredNames = new Set(SHOWCASE_CONFIG.featured.map(n => n.toLowerCase()));
-  const filtered = ALL_AGENTS.filter(a => {
-    if (featuredNames.has((a['Agent Name'] || '').toLowerCase())) return false;
-    if (activeFilter !== 'all' && a['Industry'] !== activeFilter) return false;
-    return true;
-  });
+  const filtered = ALL_AGENTS
+    .map((a, idx) => ({ a, idx }))
+    .filter(({ a }) => {
+      if (featuredNames.has((a['Agent Name'] || '').toLowerCase())) return false;
+      if (activeFilter !== 'all' && a['Industry'] !== activeFilter) return false;
+      return true;
+    });
 
   const label = document.getElementById('gridLabel');
   const grid  = document.getElementById('agentGrid');
@@ -484,22 +667,22 @@ function renderGrid() {
     return;
   }
 
-  grid.innerHTML = filtered.map((a, idx) => {
+  grid.innerHTML = filtered.map(({ a, idx }, i) => {
     const name = a['Agent Name'] || '';
     const ind  = a['Industry']   || '';
     const desc = a['Description'] || '';
+    const sl   = a['Storylane']  || '';
     return `
-      <div class="agent-card" style="animation: fadeUp .4s ${(idx % 12) * 0.04}s ease both">
-        <div class="card-photo" style="background-image:url('${esc(photo(ind))}')">
-          <div class="card-photo-overlay"></div>
-          <span class="card-industry">${esc(ind)}</span>
-        </div>
+      <div class="agent-card" style="animation: fadeUp .4s ${(i % 12) * 0.04}s ease both" onclick="openModal(${idx})">
+        ${demoThumb(sl, ind)}
+        ${!sl ? '' : `<div class="card-industry" style="position:static;padding:6px 13px 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">${esc(ind)}</div>`}
         <div class="card-body">
           <div class="card-name">${esc(name)}</div>
           <div class="card-desc">${esc(desc)}</div>
         </div>
         <div class="card-footer">
           <span class="live-badge"><span class="live-dot"></span> Live</span>
+          ${sl ? `<span style="margin-left:auto;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--teal)">▶ Demo</span>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -553,9 +736,11 @@ async function load() {
     const data = await res.json();
 
     ALL_AGENTS = data.map(a => ({
-      'Agent Name':  a.name || '',
+      'Agent Name':  a.name           || '',
       'Industry':    industryFromTags(a.tags),
       'Description': extractPurpose(a.description),
+      'Storylane':   a.storylaneUrl   || '',
+      'AssignedTo':  a.assignedTo     || '',
     }));
 
     // Stats
